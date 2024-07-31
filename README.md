@@ -1,0 +1,159 @@
+![](media/logo.png)
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/tag/insality/defold-saver?style=for-the-badge&label=Release)](https://github.com/Insality/defold-saver/tags)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/insality/defold-saver/ci_workflow.yml?style=for-the-badge)](https://github.com/Insality/defold-saver/actions)
+[![codecov](https://img.shields.io/codecov/c/github/Insality/defold-saver?style=for-the-badge)](https://codecov.io/gh/Insality/defold-saver)
+
+[![Github-sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/insality) [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/insality) [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/insality)
+
+
+# Saver
+
+**Saver** - is a library for saving and loading save data in **Defold** projects. It provides a simple API for saving and loading save data, as well as support for migrations and simple key-value storage. The library supports saving and loading data in JSON, Lua, or binary format, and can save and load files to and from the file system.
+
+## Features
+
+- **Save and Load Game State**: Save and load data with a simple API.
+- **File Management**: Save and load data to and from files.
+- **Auto-Save**: Automatically save data at regular intervals.
+- **Migrations**: Apply migrations to data when the migration version changed.
+- **Storage**: Store key-value pairs in the save data.
+- **Format support**: Save and load data in JSON, Lua or binary format.
+
+## Setup
+
+### [Dependency](https://www.defold.com/manuals/libraries/)
+
+Open your `game.project` file and add the following line to the dependencies field under the project section:
+
+**[Saver v1](https://github.com/Insality/defold-saver/archive/refs/tags/1.zip)**
+
+```
+https://github.com/Insality/defold-saver/archive/refs/tags/1.zip
+```
+
+After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
+
+### Library Size
+
+> **Note:** The library size is calculated based on the build report per platform
+
+| Platform         | Library Size |
+| ---------------- | ------------ |
+| HTML5            | **5.23 KB**  |
+| Desktop / Mobile | **8.68 KB**  |
+
+
+### Configuration [optional]
+
+You should configure the module in the `game.project` file:
+
+```ini
+[saver]
+save_name = game.json
+autosave_timer = 3
+saver_key = saver
+storage_key = storage
+```
+
+This configuration section for `game.project` defines various settings:
+
+- **save_name**: The name of the save file. Default is `game.json`.
+- **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
+- **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
+- **storage_key**: The key in the save data table that contains the Storage state. Default is `storage`.
+
+### Core Concepts
+
+Defold Saver uses the following core concepts:
+- **Auto-Save**: Automatically save data at regular intervals. It used as a default save method. This allows you to specify the data you want to keep in the save file and the library will handle the rest.
+- **Save State**: A Save state contains a set of table references in the save file. You can bind multiple save states. Bindings is done by the `saver.bind_save_part(id, table_reference)` function. When you bind the table to save state and previous data was saved, the save data will override values in your reference table. So usually you should bind the default table from module or your game data on game loader step.
+- **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
+- **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
+
+
+## Basic Usage
+
+```lua
+local saver = require("saver.saver")
+
+local game_data = {
+	score = 0,
+	level = 1,
+}
+
+function init(self)
+	saver.init()
+	saver.bind_save_part("game", game_data)
+
+	-- Now we can change game_data content and it will be saved automatically via autosave
+	game_data.score = game_data.score + 1
+
+	-- Or you can save it manually by saver.save_game_state() if you want to save it immediately
+	saver.save_game_state()
+end
+```
+
+
+## API Reference
+
+### Quick API Reference
+
+```lua
+saver.init()
+saver.bind_save_part(part_id, table_reference)
+saver.save_game_state()
+saver.load_game_state()
+saver.set_game_state(state)
+saver.get_game_state()
+saver.save_file_by_path(data, file_path)
+saver.load_file_by_path(path)
+saver.save_file_by_name(data, file_name)
+saver.load_file_by_name(file_name)
+saver.set_autosave_timer(seconds)
+saver.get_save_path()
+saver.get_save_version()
+saver.set_migrations(migration_list)
+saver.apply_migrations()
+saver.set_logger(logger)
+saver.get_current_game_project_folder()
+
+storage.set(id, value)
+storage.get(id, [default_value])
+storage.get_number(id, [default_value])
+storage.get_string(id, [default_value])
+storage.get_boolean(id, [default_value])
+```
+
+### API Reference
+
+Read the [API Reference](API_REFERENCE.md) file to see the full API documentation for the module.
+
+
+## Use Cases
+
+Read the [Use Cases](USE_CASES.md) file to see several examples of how to use the this module in your Defold game development projects.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+## Issues and Suggestions
+
+For any issues, questions, or suggestions, please [create an issue](https://github.com/Insality/defold-saver/issues).
+
+
+## 👏 Contributors
+
+<a href="https://github.com/Insality/defold-saver/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=insality/defold-saver"/>
+</a>
+
+
+## ❤️ Support project ❤️
+
+Your donation helps me stay engaged in creating valuable projects for **Defold**. If you appreciate what I'm doing, please consider supporting me!
+
+[![Github-sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/insality) [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/insality) [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/insality)

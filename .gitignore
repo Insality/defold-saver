@@ -1,0 +1,11 @@
+/.internal
+/build
+.DS_Store
+Thumbs.db
+
+.deployer_cache
+dist
+deployer_build_stats.csv
+bob*.jar
+manifest.*.der
+deployer_version_settings.txt

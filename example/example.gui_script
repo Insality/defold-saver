@@ -1,0 +1,20 @@
+local saver = require("saver.saver")
+
+local state = {
+	value = 0
+}
+
+function init(self)
+	-- Initialize the saver
+	saver.init()
+
+	-- Add save parts to the saver
+	saver.bind_save_state("game", state)
+
+	-- Use table as usual now, it will be saved automatically
+	state.value = state.value + 1
+	print("Value:", state.value)
+
+	-- Save manually or via autosave
+	saver.save_game_state()
+end

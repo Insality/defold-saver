@@ -1,0 +1,23 @@
+syntax = "proto3"
+
+package saver
+
+message state {
+	uint32 version = 1;
+	string last_game_version = 2;
+	uint32 migration_version = 3;
+}
+
+message storage {
+	message value {
+		oneof value {
+			string s_value = 1;
+			double i_value = 2;
+			bool b_value = 3;
+		}
+	}
+
+	message state {
+		map<string, value> storage = 1;
+	}
+}
