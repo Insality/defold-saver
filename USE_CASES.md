@@ -226,3 +226,17 @@ local function init(self)
 end
 
 ```
+
+## Use Custom json.encode function
+
+In case you want to use your own json.encode function, you can set it to the saver module.
+
+Currently you should override it in `saver.saver_internal` module.
+
+```lua
+local json = require("json")
+local saver_internal = require("saver.saver_internal")
+
+saver_internal.json_encode = json.sorted_encode
+```
+

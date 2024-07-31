@@ -53,6 +53,14 @@ function M.split(s, sep)
 end
 
 
+---Encode the data to JSON. Overwrite this function if you want to use another JSON library
+---@param data table The data to encode
+---@return string The JSON encoded string
+function M.json_encode(data)
+	return json.encode(data)
+end
+
+
 ---@param version string The version string in format "major.minor.patch" or "major.minor" or "major"
 ---@return number
 function M.parse_game_version(version)
@@ -149,7 +157,7 @@ function M.save_to_path(data, filepath)
 		local file = io.open(filepath, "w+")
 
 		if file then
-			file:write(json.encode(data))
+			file:write(M.json_encode(data))
 			file:close()
 			return true
 		else
@@ -275,7 +283,7 @@ local SET_LOCAL_STORAGE =  [[
 ---@param path string The path to the data in the local storage
 ---@return boolean true if the data was saved successfully, false otherwise
 function M.save_html5(data, path)
-	local encoded_data = json.encode(data)
+	local encoded_data = M.json_encode(data)
 	encoded_data = string.gsub(encoded_data, "'", "\'")
 
 	local is_save_successful = html5.run(string.format(SET_LOCAL_STORAGE, path, encoded_data))
