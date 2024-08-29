@@ -14,11 +14,13 @@ M.empty_logger = {
 
 ---@type saver.logger
 M.logger = {
-	trace = function(_, msg) print("TRACE: " .. msg) end,
-	debug = function(_, msg, data) pprint("DEBUG: " .. msg, data) end,
-	info = function(_, msg, data) pprint("INFO: " .. msg, data) end,
-	warn = function(_, msg, data) pprint("WARN: " .. msg, data) end,
-	error = function(_, msg, data) pprint("ERROR: " .. msg, data) end
+	trace = EMPTY_FUNCTION,
+	debug = EMPTY_FUNCTION,
+	info = EMPTY_FUNCTION,
+	warn = EMPTY_FUNCTION,
+	error = function(_, message, context)
+		pprint(message, context)
+	end,
 }
 
 ---Contains the current game state data
