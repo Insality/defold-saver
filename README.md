@@ -66,7 +66,7 @@ This configuration section for `game.project` defines various settings:
 
 Defold Saver uses the following core concepts:
 - **Auto-Save**: Automatically save data at regular intervals. It used as a default save method. This allows you to specify the data you want to keep in the save file and the library will handle the rest.
-- **Save State**: A Save state contains a set of table references in the save file. You can bind multiple save states. Bindings is done by the `saver.bind_save_part(id, table_reference)` function. When you bind the table to save state and previous data was saved, the save data will override values in your reference table. So usually you should bind the default table from module or your game data on game loader step.
+- **Save State**: A Save state contains a set of table references in the save file. You can bind multiple save states. Bindings is done by the `saver.bind_save_state(id, table_reference)` function. When you bind the table to save state and previous data was saved, the save data will override values in your reference table. So usually you should bind the default table from module or your game data on game loader step.
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
 
@@ -83,7 +83,7 @@ local game_data = {
 
 function init(self)
 	saver.init()
-	saver.bind_save_part("game", game_data)
+	saver.bind_save_state("game", game_data)
 
 	-- Now we can change game_data content and it will be saved automatically via autosave
 	game_data.score = game_data.score + 1
@@ -100,7 +100,7 @@ end
 
 ```lua
 saver.init()
-saver.bind_save_part(part_id, table_reference)
+saver.bind_save_state(table_key_id, table_reference)
 saver.save_game_state()
 saver.load_game_state()
 saver.set_game_state(state)

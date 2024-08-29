@@ -47,7 +47,8 @@ function M.get_number(name, default_value)
 
 	local value = M.get(name, default_value)
 	if type(value) == TYPE_NUMBER then
-		return value --[[@as number]]
+		---@cast value number
+		return value
 	end
 	return default_value
 end
@@ -62,7 +63,8 @@ function M.get_string(name, default_value)
 
 	local value = M.get(name, default_value)
 	if type(value) == TYPE_STRING then
-		return value --[[@as string]]
+		---@cast value string
+		return value
 	end
 	return default_value
 end
@@ -77,7 +79,8 @@ function M.get_boolean(name, default_value)
 
 	local value = M.get(name, default_value)
 	if type(value) == TYPE_BOOLEAN then
-		return value --[[@as boolean]]
+		---@cast value boolean
+		return value
 	end
 	return default_value
 end
@@ -91,17 +94,20 @@ function M.set(id, value)
 	local v = M.state.storage[id] or {}
 
 	if type(value) == TYPE_STRING then
-		v.s_value = value --[[@as string]]
+		---@cast value string
+		v.s_value = value
 		v.i_value = nil
 		v.b_value = nil
 	end
 	if type(value) == TYPE_NUMBER then
-		v.i_value = value --[[@as number]]
+		---@cast value number
+		v.i_value = value
 		v.s_value = nil
 		v.b_value = nil
 	end
 	if type(value) == TYPE_BOOLEAN then
-		v.b_value = value --[[@as boolean]]
+		---@cast value boolean
+		v.b_value = value
 		v.s_value = nil
 		v.i_value = nil
 	end

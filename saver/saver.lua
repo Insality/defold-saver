@@ -12,10 +12,11 @@ local migrations = require("saver.migrations")
 local saver_internal = require("saver.saver_internal")
 
 local PROJECT_NAME = sys.get_config_string("project.title")
+local DIRECTORY_PATH = sys.get_config_string("saver.save_folder", PROJECT_NAME)
 local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage")
-local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 0)
+local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 
 
 ---@class saver
@@ -135,23 +136,23 @@ end
 
 
 ---Load and override the table_reference. The reference on the table keeps the same
----@param key_id string The save state id to save
+---@param table_key_id string The save state id to save
 ---@param table_reference table The save state table
 ---@return table The table_reference
-function M.bind_save_state(key_id, table_reference)
+function M.bind_save_state(table_key_id, table_reference)
 	local save_table = M.get_game_state()
 	assert(save_table, "Add save part should be called after init")
 
 	-- Add the save part if it doesn't exist
-	if not save_table[key_id] then
-		save_table[key_id] = table_reference
+	if not save_table[table_key_id] then
+		save_table[table_key_id] = table_reference
 		return table_reference
 	end
 
 	-- Override the save part if it exists
 	-- Values from previous save part will be copied to the new save part
-	local prev_reference = save_table[key_id]
-	save_table[key_id] = table_reference
+	local prev_reference = save_table[table_key_id]
+	save_table[table_key_id] = table_reference
 	saver_internal.override(prev_reference, table_reference)
 
 	return table_reference
@@ -207,14 +208,14 @@ function M.delete_file_by_name(filename)
 end
 
 
----Get the save path in the save directory
----@param filename string
----@return string
+---This function returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
+---@param filename string @The name of the file to get the path for. Can contain subfolders.
+---@return string @The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
 function M.get_save_path(filename)
 	assert(filename, "Can't get save path without filename")
 
 	-- If filename contains "/" extract subfolder to the dir_name
-	local directory_path = PROJECT_NAME
+	local directory_path = DIRECTORY_PATH
 	if filename:find("/") then
 		local splitted = saver_internal.split(filename, "/")
 		filename = splitted[#splitted]

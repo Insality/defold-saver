@@ -17,7 +17,7 @@ local game_data = {
 
 function init(self)
 	saver.init()
-	saver.bind_save_part("game", game_data)
+	saver.bind_save_state("game", game_data)
 end
 ```
 
@@ -47,7 +47,7 @@ You can use `saver.get_game_state()` to get the current game state. It will retu
 ```lua
 function init(self)
 	saver.init()
-	saver.bind_save_part("game", game_data)
+	saver.bind_save_state("game", game_data)
 
 	-- Inspect the game state
 	pprint(saver.get_game_state())
@@ -79,7 +79,7 @@ local my_library = require("my_library")
 
 function init(self)
 	saver.init()
-	saver.bind_save_part("my_library", my_library.state)
+	saver.bind_save_state("my_library", my_library.state)
 
 	-- After bind save state, you can use your library functions
 	-- The state will be loaded from the save file and will be saved automatically
@@ -115,8 +115,8 @@ local migrations = {
 function init(data)
 	saver.set_migrations(migrations)
 	saver.init()
-	saver.bind_save_part("game", game_data)
-	saver.bind_save_part("settings", settings_data)
+	saver.bind_save_state("game", game_data)
+	saver.bind_save_state("settings", settings_data)
 
 	-- We need to call `set_migrations` before `init` to correct
 	-- tracking of current migration version

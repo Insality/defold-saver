@@ -4,7 +4,7 @@
 
 - [Saver Functions](#saver-functions)
   - [saver.init](#saverinit)
-  - [saver.bind_save_part](#saverbind_save_part)
+  - [saver.bind_save_state](#saverbind_save_state)
   - [saver.save_game_state](#saversave_game_state)
   - [saver.load_game_state](#saverload_game_state)
   - [saver.get_game_state](#saverget_game_state)
@@ -55,18 +55,18 @@ This function loads the game state from a file and starts the autosave timer. If
 saver.init()
 ```
 
-**saver.bind_save_part**
+**saver.bind_save_state**
 ---
 ```lua
-saver.bind_save_part(key_id, table_reference)
+saver.bind_save_state(table_key_id, table_reference)
 ```
 
-This function binds a table reference to a part of the game state. When the game state is saved, the table reference will be saved as part of the game state.
+This function binds a table reference as a part of the game state. When the game state is saved, the all table references will be saved to the game state.
 
 This is a main function to use to save your game state. You can bind multiple tables to different parts of the game state. After binding, the `table_reference` will be changed by the saved data.
 
 - **Parameters:**
-  - `key_id`: The table key to set the value for.
+  - `table_key_id`: The table key to set the value for.
   - `table_reference`: The table reference to bind to the game state.
 
 - **Usage Example:**
@@ -77,7 +77,7 @@ local game_state = {
   money = 100
 }
 
-saver.bind_save_part("game", game_state)
+saver.bind_save_state("game", game_state)
 
 -- If we have previously saved game state, the game_state will be changed to the saved data
 print(game_state.level) -- 5 (if it was saved as before)
@@ -378,7 +378,7 @@ local migrations = {
 
 saver.set_migrations(migrations)
 saver.init()
-saver.bind_save_part("game", game_state)
+saver.bind_save_state("game", game_state)
 saver.apply_migrations()
 ```
 
@@ -462,6 +462,14 @@ print(project_folder)
 ## Storage Functions
 
 The Storage module provides several functions to work with key-value storage:
+
+Before using the storage module, you `saver.init()` should be called to initialize the storage data.
+
+To start using the module in your project, you first need to import it. This can be done with the following line of code:
+
+```lua
+local storage = require("saver.storage")
+```
 
 **storage.set**
 ---
