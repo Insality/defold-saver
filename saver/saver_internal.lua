@@ -136,7 +136,7 @@ function M.load_by_path(filepath)
 	else
 		local is_exists = sys.exists(filepath)
 		if not is_exists then
-			M.logger:error("Can't load the file from save directory", filepath)
+			M.logger:debug("The file is not exists", filepath)
 			return nil
 		end
 

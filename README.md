@@ -99,6 +99,7 @@ end
 ### Quick API Reference
 
 ```lua
+local saver = require("saver.saver")
 saver.init()
 saver.bind_save_state(table_key_id, table_reference)
 saver.save_game_state()
@@ -117,6 +118,7 @@ saver.apply_migrations()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
 
+local storage = require("saver.storage")
 storage.set(id, value)
 storage.get(id, [default_value])
 storage.get_number(id, [default_value])

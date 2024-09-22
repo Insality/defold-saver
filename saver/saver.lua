@@ -291,6 +291,10 @@ end
 ---Get current folder with Defold project (only desktop)
 ---@return string|nil @Current project folder or nil if can't get it
 function M.get_current_game_project_folder()
+	if not io.popen or html5 then
+		return nil
+	end
+
 	local file = io.popen("pwd")
 	if not file then
 		return nil
