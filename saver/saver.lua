@@ -24,6 +24,7 @@ local M = {}
 M.autosave_timer_id = nil
 M.autosave_timer_counter = 0
 M.last_autosave_time = nil
+M.before_save_callback = nil
 
 ---@param logger_instance saver.logger|nil
 function M.set_logger(logger_instance)
@@ -47,6 +48,10 @@ end
 ---@param save_name string|nil @The save name. If not passed, will use default from settings
 ---@return boolean
 function M.save_game_state(save_name)
+	if M.before_save_callback then
+		M.before_save_callback()
+	end
+
 	save_name = save_name or SAVE_NAME
 	local path = M.get_save_path(save_name)
 

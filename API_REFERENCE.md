@@ -459,6 +459,23 @@ local project_folder = saver.get_current_game_project_folder()
 print(project_folder)
 ```
 
+**saver.before_save_callback**
+---
+```lua
+saver.before_save_callback = function() "Called before saver saves data" end
+```
+
+This function is a callback that is called before the saver saves the game state. You can use it to perform additional actions before saving the game state. For example to update your save data with values from the game.
+
+- **Usage Example:**
+
+```lua
+saver.before_save_callback = function()
+  profile.update_save_data()
+end
+```
+
+
 ## Storage Functions
 
 The Storage module provides several functions to work with key-value storage:

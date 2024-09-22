@@ -117,6 +117,7 @@ saver.set_migrations(migration_list)
 saver.apply_migrations()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
+saver.before_save_callback = function() "Called before saver saves data" end
 
 local storage = require("saver.storage")
 storage.set(id, value)
