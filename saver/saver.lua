@@ -26,7 +26,7 @@ M.autosave_timer_counter = 0
 M.last_autosave_time = nil
 M.before_save_callback = nil
 
----@param logger_instance saver.logger|nil
+---@param logger_instance saver.logger|table|nil
 function M.set_logger(logger_instance)
 	saver_internal.logger = logger_instance or saver_internal.empty_logger
 end

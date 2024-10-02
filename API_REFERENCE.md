@@ -207,8 +207,10 @@ local data = {
   level = 1
 }
 
---- Save the path to the game save folder
-local file_path = saver.get_save_path("data.json")
+--- Get project path works on build from the Defold Editor only
+local project_path = saver.get_current_game_project_folder()
+--- Use path to the resources folder
+local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 saver.save_file_by_path(data, file_path)
 ```
 
@@ -229,7 +231,10 @@ This function loads the data from a file at the specified path.
 - **Usage Example:**
 
 ```lua
-local file_path = saver.get_save_path("data.json")
+--- Get project path works on build from the Defold Editor only
+local project_path = saver.get_current_game_project_folder()
+--- Use path to the resources folder
+local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 local data = saver.load_file_by_path(file_path)
 pprint(data)
 ```
