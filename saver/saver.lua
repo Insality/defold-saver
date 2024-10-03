@@ -131,7 +131,7 @@ end
 
 
 ---Set the save table data
----@param data saver.game_state|nil
+---@param data saver.game_state
 ---@return boolean
 function M.set_game_state(data)
 	assert(data, "Can't set nil game state")
@@ -246,6 +246,7 @@ function M.set_autosave_timer(timer)
 end
 
 
+---@private
 ---Autosave timer callback
 function M.on_autosave_timer()
 	if M.autosave_timer_counter <= 0 then
@@ -264,6 +265,7 @@ function M.on_autosave_timer()
 end
 
 
+---@private
 ---Schedule autosave
 function M.schedule_autosave()
 	if M.autosave_timer_id then
@@ -279,6 +281,7 @@ function M.schedule_autosave()
 end
 
 
+---@private
 function M.check_game_version()
 	local saver_state = M.get_game_state()[SAVER_KEY]
 

@@ -9,10 +9,13 @@
   - [saver.load_game_state](#saverload_game_state)
   - [saver.get_game_state](#saverget_game_state)
   - [saver.set_game_state](#saverset_game_state)
+  - [saver.delete_game_state](#saverdelete_game_state)
   - [saver.save_file_by_path](#saversave_file_by_path)
   - [saver.load_file_by_path](#saverload_file_by_path)
+  - [saver.delete_file_by_path](#saverdelete_file_by_path)
   - [saver.save_file_by_name](#saversave_file_by_name)
   - [saver.load_file_by_name](#saverload_file_by_name)
+  - [saver.delete_file_by_name](#saverdelete_file_by_name)
   - [saver.set_autosave_timer](#saverset_autosave_timer)
   - [saver.get_save_path](#saverget_save_path)
   - [saver.get_save_version](#saverget_save_version)
@@ -184,6 +187,31 @@ saver.set_game_state(state)
 ```
 
 
+**saver.delete_game_state**
+---
+```lua
+saver.delete_game_state([file_name])
+```
+
+This function deletes the game state file. If no file name is provided, the default file name specified in the `game.project` file is used.
+
+- **Parameters:**
+  - `file_name`: The name of the file to delete the game state from. Default is the file name specified in the `game.project` file.
+
+- **Return Value:**
+  - `true` if the game state was deleted successfully, `false` otherwise.
+
+- **Usage Example:**
+
+```lua
+-- Delete the game state using the default file name
+saver.delete_game_state()
+
+-- Delete the game state from a file named "save.json"
+saver.delete_game_state("save.json")
+```
+
+
 **saver.save_file_by_path**
 ---
 ```lua
@@ -214,6 +242,7 @@ local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 saver.save_file_by_path(data, file_path)
 ```
 
+
 **saver.load_file_by_path**
 ---
 ```lua
@@ -238,6 +267,32 @@ local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 local data = saver.load_file_by_path(file_path)
 pprint(data)
 ```
+
+
+**saver.delete_file_by_path**
+---
+```lua
+saver.delete_file_by_path(path)
+```
+
+This function deletes the file at the specified path.
+
+- **Parameters:**
+  - `path`: The absolute path to the file to delete. Contains the file name and extension.
+
+- **Return Value:**
+  - `true` if the file was deleted successfully, `false` otherwise.
+
+- **Usage Example:**
+
+```lua
+--- Get project path works on build from the Defold Editor only
+local project_path = saver.get_current_game_project_folder()
+--- Use path to the resources folder
+local file_path = saver.get_save_path(project_path .. "/resources/data.json")
+saver.delete_file_by_path(file_path)
+```
+
 
 **saver.save_file_by_name**
 ---
@@ -266,6 +321,7 @@ local data = {
 saver.save_file_by_name(data, "data.json")
 ```
 
+
 **saver.load_file_by_name**
 ---
 ```lua
@@ -286,6 +342,28 @@ This function loads the data from a file with the specified name. The file is lo
 local data = saver.load_file_by_name("data.json")
 pprint(data)
 ```
+
+
+**saver.delete_file_by_name**
+---
+```lua
+saver.delete_file_by_name(file_name)
+```
+
+This function deletes the file with the specified name. The file is deleted from the game save folder. Filename supports subfolders.
+
+- **Parameters:**
+  - `file_name`: The name of the file to delete. Can contain subfolders.
+
+- **Return Value:**
+  - `true` if the file was deleted successfully, `false` otherwise.
+
+- **Usage Example:**
+
+```lua
+saver.delete_file_by_name("data.json")
+```
+
 
 **saver.set_autosave_timer**
 ---
