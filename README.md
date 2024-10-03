@@ -25,10 +25,10 @@
 
 Open your `game.project` file and add the following line to the dependencies field under the project section:
 
-**[Saver v1](https://github.com/Insality/defold-saver/archive/refs/tags/1.zip)**
+**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/2.zip)**
 
 ```
-https://github.com/Insality/defold-saver/archive/refs/tags/1.zip
+https://github.com/Insality/defold-saver/archive/refs/tags/2.zip
 ```
 
 After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
@@ -155,6 +155,19 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 <a href="https://github.com/Insality/defold-saver/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=insality/defold-saver"/>
 </a>
+
+## Changelog
+
+<details>
+
+### **V1**
+	- Initial release
+
+### **V2**
+	- Update docs, missing API for saver.delete_* functions
+	- Fix error with `get_current_game_project_folder` while using in HTML5 builds
+	- Add `saver.before_save_callback` callback for custom save logic. Can be used to prepare/update data before saving, like transfing from real-time data to save data
+</details>
 
 
 ## ❤️ Support project ❤️
