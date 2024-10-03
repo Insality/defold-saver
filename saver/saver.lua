@@ -24,8 +24,9 @@ local M = {}
 M.autosave_timer_id = nil
 M.autosave_timer_counter = 0
 M.last_autosave_time = nil
+M.before_save_callback = nil
 
----@param logger_instance saver.logger|nil
+---@param logger_instance saver.logger|table|nil
 function M.set_logger(logger_instance)
 	saver_internal.logger = logger_instance or saver_internal.empty_logger
 end
@@ -47,6 +48,10 @@ end
 ---@param save_name string|nil @The save name. If not passed, will use default from settings
 ---@return boolean
 function M.save_game_state(save_name)
+	if M.before_save_callback then
+		M.before_save_callback()
+	end
+
 	save_name = save_name or SAVE_NAME
 	local path = M.get_save_path(save_name)
 
@@ -126,7 +131,7 @@ end
 
 
 ---Set the save table data
----@param data saver.game_state|nil
+---@param data saver.game_state
 ---@return boolean
 function M.set_game_state(data)
 	assert(data, "Can't set nil game state")
@@ -241,6 +246,7 @@ function M.set_autosave_timer(timer)
 end
 
 
+---@private
 ---Autosave timer callback
 function M.on_autosave_timer()
 	if M.autosave_timer_counter <= 0 then
@@ -259,6 +265,7 @@ function M.on_autosave_timer()
 end
 
 
+---@private
 ---Schedule autosave
 function M.schedule_autosave()
 	if M.autosave_timer_id then
@@ -274,6 +281,7 @@ function M.schedule_autosave()
 end
 
 
+---@private
 function M.check_game_version()
 	local saver_state = M.get_game_state()[SAVER_KEY]
 
@@ -291,6 +299,10 @@ end
 ---Get current folder with Defold project (only desktop)
 ---@return string|nil @Current project folder or nil if can't get it
 function M.get_current_game_project_folder()
+	if not io.popen or html5 then
+		return nil
+	end
+
 	local file = io.popen("pwd")
 	if not file then
 		return nil

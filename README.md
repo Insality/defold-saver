@@ -25,10 +25,10 @@
 
 Open your `game.project` file and add the following line to the dependencies field under the project section:
 
-**[Saver v1](https://github.com/Insality/defold-saver/archive/refs/tags/1.zip)**
+**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/2.zip)**
 
 ```
-https://github.com/Insality/defold-saver/archive/refs/tags/1.zip
+https://github.com/Insality/defold-saver/archive/refs/tags/2.zip
 ```
 
 After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
@@ -99,24 +99,30 @@ end
 ### Quick API Reference
 
 ```lua
+local saver = require("saver.saver")
 saver.init()
 saver.bind_save_state(table_key_id, table_reference)
-saver.save_game_state()
-saver.load_game_state()
-saver.set_game_state(state)
+saver.save_game_state([save_name])
+saver.load_game_state([save_name])
+saver.set_game_state(game_state)
 saver.get_game_state()
-saver.save_file_by_path(data, file_path)
-saver.load_file_by_path(path)
+saver.delete_game_state([save_name])
+saver.save_file_by_path(data, absolute_file_path)
+saver.load_file_by_path(absolute_file_path)
+saver.delete_file_by_path(absolute_file_path)
 saver.save_file_by_name(data, file_name)
 saver.load_file_by_name(file_name)
+saver.delete_file_by_name(file_name)
 saver.set_autosave_timer(seconds)
-saver.get_save_path()
+saver.get_save_path(file_name)
 saver.get_save_version()
 saver.set_migrations(migration_list)
 saver.apply_migrations()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
+saver.before_save_callback = function() "Called before saver saves data" end
 
+local storage = require("saver.storage")
 storage.set(id, value)
 storage.get(id, [default_value])
 storage.get_number(id, [default_value])
@@ -149,6 +155,19 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 <a href="https://github.com/Insality/defold-saver/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=insality/defold-saver"/>
 </a>
+
+## Changelog
+
+<details>
+
+### **V1**
+	- Initial release
+
+### **V2**
+	- Update docs, missing API for saver.delete_* functions
+	- Fix error with `get_current_game_project_folder` while using in HTML5 builds
+	- Add `saver.before_save_callback` callback for custom save logic. Can be used to prepare/update data before saving, like transfing from real-time data to save data
+</details>
 
 
 ## ❤️ Support project ❤️
