@@ -11,8 +11,9 @@ local storage = require("saver.storage")
 local migrations = require("saver.migrations")
 local saver_internal = require("saver.saver_internal")
 
-local PROJECT_NAME = sys.get_config_string("project.title")
-local DIRECTORY_PATH = sys.get_config_string("saver.save_folder", PROJECT_NAME):gsub("%W", "")
+--- Take a default folder name as a project name without special characters
+local PROJECT_NAME = sys.get_config_string("project.title"):gsub("[^%w_ ]", "")
+local DIRECTORY_PATH = sys.get_config_string("saver.save_folder", PROJECT_NAME)
 local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage")

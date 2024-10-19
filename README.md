@@ -50,6 +50,7 @@ You should configure the module in the `game.project` file:
 ```ini
 [saver]
 save_name = game.json
+save_folder = Defold Saver
 autosave_timer = 3
 saver_key = saver
 storage_key = storage
@@ -58,6 +59,7 @@ storage_key = storage
 This configuration section for `game.project` defines various settings:
 
 - **save_name**: The name of the save file. Default is `game.json`.
+- **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name.
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
 - **storage_key**: The key in the save data table that contains the Storage state. Default is `storage`.
@@ -167,6 +169,10 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 	- Update docs, missing API for saver.delete_* functions
 	- Fix error with `get_current_game_project_folder` while using in HTML5 builds
 	- Add `saver.before_save_callback` callback for custom save logic. Can be used to prepare/update data before saving, like transfing from real-time data to save data
+
+### **V3**
+From this version a save folder taken differently from your project title, you can configure it in `game.project` file to match your previous save folder.
+	- Add `saver.save_folder` configuration option to README.md.
 </details>
 
 
