@@ -143,7 +143,7 @@ end
 ---Load and override the table_reference. The reference on the table keeps the same
 ---@param table_key_id string The save state id to save
 ---@param table_reference table The save state table
----@return table The table_reference
+---@return table table_reference The table_reference
 function M.bind_save_state(table_key_id, table_reference)
 	local save_table = M.get_game_state()
 	assert(save_table, "Add save part should be called after init")

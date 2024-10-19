@@ -37,6 +37,8 @@ function M.reset_state()
 		migration_version = 0,
 	}
 end
+
+
 M.reset_state()
 
 
@@ -246,7 +248,7 @@ function M.table_to_lua_string(tbl, indent, is_array)
 end
 
 
-local GET_LOCAL_STORAGE =  [[
+local GET_LOCAL_STORAGE = [[
 (function() {
 	try {
 		return window.localStorage.getItem('%s') || '{}';
@@ -269,7 +271,7 @@ function M.load_html5(path)
 end
 
 
-local SET_LOCAL_STORAGE =  [[
+local SET_LOCAL_STORAGE = [[
 (function() {
 	try {
 		window.localStorage.setItem('%s','%s');
