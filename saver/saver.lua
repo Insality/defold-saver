@@ -117,7 +117,7 @@ function M.delete_game_state(save_name)
 	if is_success then
 		saver_internal.logger:info("Delete game state", { save_name = save_name, path = path })
 	else
-		saver_internal.logger:error("Can't delete the file", { save_name = save_name, path = path })
+		saver_internal.logger:info("File not exists to remove", { save_name = save_name, path = path })
 	end
 
 	return is_success
