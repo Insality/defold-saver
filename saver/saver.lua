@@ -186,7 +186,7 @@ end
 ---@param path string
 ---@return boolean
 function M.delete_file_by_path(path)
-	return os.remove(path)
+	return saver_internal.delete_by_path(path)
 end
 
 

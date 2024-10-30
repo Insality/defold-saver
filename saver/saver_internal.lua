@@ -147,6 +147,18 @@ function M.load_by_path(filepath)
 end
 
 
+---Remove file by path
+---@param filepath string The file path
+---@return boolean true if the file was removed successfully, false otherwise
+function M.delete_by_path(filepath)
+	if html5 then
+		M.delete_html5(filepath)
+	end
+
+	return os.remove(filepath)
+end
+
+
 ---Save the data in save directory
 ---@param data table The save data table
 ---@param filepath string The save file path in save directory
@@ -293,6 +305,26 @@ function M.save_html5(data, path)
 	local is_save_successful = html5.run(string.format(SET_LOCAL_STORAGE, path, encoded_data))
 
 	return (not not is_save_successful)
+end
+
+
+local REMOVE_LOCAL_STORAGE = [[
+(function() {
+	try {
+		window.localStorage.removeItem('%s');
+		return true;
+	} catch(e) {
+		return false;
+	}
+})()
+]]
+
+---Remove the data from the local storage in HTML5
+---@param path string The path to the data in the local storage
+---@return boolean true if the data was removed successfully, false otherwise
+function M.delete_html5(path)
+	local is_delete_successful = html5.run(string.format(REMOVE_LOCAL_STORAGE, path))
+	return (not not is_delete_successful)
 end
 
 
