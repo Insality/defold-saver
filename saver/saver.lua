@@ -105,7 +105,8 @@ function M.load_game_state(save_name)
 end
 
 
----Delete the game state
+---Delete the game state file. Doesn't affect the current game state
+---If autosave is enabled, it will be rescheduled, so probably you want to immediately restart the game
 ---@param save_name string|nil @The save name. If not passed, will use default from settings
 ---@return boolean
 function M.delete_game_state(save_name)
