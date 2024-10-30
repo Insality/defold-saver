@@ -57,7 +57,8 @@ function M.split(s, sep)
 end
 
 
----Encode the data to JSON. Overwrite this function if you want to use another JSON library
+---Encode the data to JSON.
+---Overwrite this function if you want to use another JSON library
 ---@param data table The data to encode
 ---@return string The JSON encoded string
 function M.json_encode(data)
@@ -263,9 +264,9 @@ end
 local GET_LOCAL_STORAGE = [[
 (function() {
 	try {
-		return window.localStorage.getItem('%s') || '{}';
+		return window.localStorage.getItem('%s') || '';
 	} catch(e) {
-		return '{}';
+		return '';
 	}
 }) ()
 ]]
@@ -275,18 +276,26 @@ local GET_LOCAL_STORAGE = [[
 ---@return table|nil The loaded data
 function M.load_html5(path)
 	local web_data = html5.run(string.format(GET_LOCAL_STORAGE, path))
-	if not web_data then
+	if not web_data or web_data == "" then
 		return nil
 	end
 
-	return json.decode(web_data)
+	local decoded = defold_saver.decode_base64(web_data)
+	local is_ok, lua_data = pcall(sys.deserialize, decoded)
+
+	if not is_ok then
+		M.logger:error("Can't parse the data from local storage", lua_data)
+		return nil
+	end
+
+	return lua_data
 end
 
 
 local SET_LOCAL_STORAGE = [[
 (function() {
 	try {
-		window.localStorage.setItem('%s','%s');
+		window.localStorage.setItem('%s', '%s');
 		return true;
 	} catch(e) {
 		return false;
@@ -299,11 +308,10 @@ local SET_LOCAL_STORAGE = [[
 ---@param path string The path to the data in the local storage
 ---@return boolean true if the data was saved successfully, false otherwise
 function M.save_html5(data, path)
-	local encoded_data = M.json_encode(data)
-	encoded_data = string.gsub(encoded_data, "'", "\'")
+	local encoded_data = defold_saver.encode_base64(sys.serialize(data))
 
-	local is_save_successful = html5.run(string.format(SET_LOCAL_STORAGE, path, encoded_data))
-
+	local html_command = string.format(SET_LOCAL_STORAGE, path, encoded_data)
+	local is_save_successful = html5.run(html_command)
 	return (not not is_save_successful)
 end
 

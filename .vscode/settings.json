@@ -29,7 +29,8 @@
 		"socket",
 		"assert_equal",
 		"sys",
-		"html5"
+		"html5",
+		"defold_saver"
 	],
 	"Lua.format.defaultConfig": {
 		"tab_width": "4",
