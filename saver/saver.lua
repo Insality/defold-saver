@@ -11,7 +11,8 @@ local storage = require("saver.storage")
 local migrations = require("saver.migrations")
 local saver_internal = require("saver.saver_internal")
 
-local PROJECT_NAME = sys.get_config_string("project.title")
+--- Take a default folder name as a project name without special characters
+local PROJECT_NAME = sys.get_config_string("project.title"):gsub("[^%w_ ]", "")
 local DIRECTORY_PATH = sys.get_config_string("saver.save_folder", PROJECT_NAME)
 local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
@@ -104,7 +105,8 @@ function M.load_game_state(save_name)
 end
 
 
----Delete the game state
+---Delete the game state file. Doesn't affect the current game state
+---If autosave is enabled, it will be rescheduled, so probably you want to immediately restart the game
 ---@param save_name string|nil @The save name. If not passed, will use default from settings
 ---@return boolean
 function M.delete_game_state(save_name)
@@ -116,7 +118,7 @@ function M.delete_game_state(save_name)
 	if is_success then
 		saver_internal.logger:info("Delete game state", { save_name = save_name, path = path })
 	else
-		saver_internal.logger:error("Can't delete the file", { save_name = save_name, path = path })
+		saver_internal.logger:info("File not exists to remove", { save_name = save_name, path = path })
 	end
 
 	return is_success
@@ -143,7 +145,7 @@ end
 ---Load and override the table_reference. The reference on the table keeps the same
 ---@param table_key_id string The save state id to save
 ---@param table_reference table The save state table
----@return table The table_reference
+---@return table table_reference The table_reference
 function M.bind_save_state(table_key_id, table_reference)
 	local save_table = M.get_game_state()
 	assert(save_table, "Add save part should be called after init")
@@ -185,7 +187,7 @@ end
 ---@param path string
 ---@return boolean
 function M.delete_file_by_path(path)
-	return os.remove(path)
+	return saver_internal.delete_by_path(path)
 end
 
 

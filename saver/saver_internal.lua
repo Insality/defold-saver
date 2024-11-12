@@ -37,6 +37,8 @@ function M.reset_state()
 		migration_version = 0,
 	}
 end
+
+
 M.reset_state()
 
 
@@ -55,7 +57,8 @@ function M.split(s, sep)
 end
 
 
----Encode the data to JSON. Overwrite this function if you want to use another JSON library
+---Encode the data to JSON.
+---Overwrite this function if you want to use another JSON library
 ---@param data table The data to encode
 ---@return string The JSON encoded string
 function M.json_encode(data)
@@ -142,6 +145,18 @@ function M.load_by_path(filepath)
 
 		return sys.load(filepath)
 	end
+end
+
+
+---Remove file by path
+---@param filepath string The file path
+---@return boolean true if the file was removed successfully, false otherwise
+function M.delete_by_path(filepath)
+	if html5 then
+		M.delete_html5(filepath)
+	end
+
+	return os.remove(filepath)
 end
 
 
@@ -246,12 +261,12 @@ function M.table_to_lua_string(tbl, indent, is_array)
 end
 
 
-local GET_LOCAL_STORAGE =  [[
+local GET_LOCAL_STORAGE = [[
 (function() {
 	try {
-		return window.localStorage.getItem('%s') || '{}';
+		return window.localStorage.getItem('%s') || '';
 	} catch(e) {
-		return '{}';
+		return '';
 	}
 }) ()
 ]]
@@ -261,18 +276,26 @@ local GET_LOCAL_STORAGE =  [[
 ---@return table|nil The loaded data
 function M.load_html5(path)
 	local web_data = html5.run(string.format(GET_LOCAL_STORAGE, path))
-	if not web_data then
+	if not web_data or web_data == "" then
 		return nil
 	end
 
-	return json.decode(web_data)
+	local decoded = defold_saver.decode_base64(web_data)
+	local is_ok, lua_data = pcall(sys.deserialize, decoded)
+
+	if not is_ok then
+		M.logger:error("Can't parse the data from local storage", lua_data)
+		return nil
+	end
+
+	return lua_data
 end
 
 
-local SET_LOCAL_STORAGE =  [[
+local SET_LOCAL_STORAGE = [[
 (function() {
 	try {
-		window.localStorage.setItem('%s','%s');
+		window.localStorage.setItem('%s', '%s');
 		return true;
 	} catch(e) {
 		return false;
@@ -285,12 +308,31 @@ local SET_LOCAL_STORAGE =  [[
 ---@param path string The path to the data in the local storage
 ---@return boolean true if the data was saved successfully, false otherwise
 function M.save_html5(data, path)
-	local encoded_data = M.json_encode(data)
-	encoded_data = string.gsub(encoded_data, "'", "\'")
+	local encoded_data = defold_saver.encode_base64(sys.serialize(data))
 
-	local is_save_successful = html5.run(string.format(SET_LOCAL_STORAGE, path, encoded_data))
-
+	local html_command = string.format(SET_LOCAL_STORAGE, path, encoded_data)
+	local is_save_successful = html5.run(html_command)
 	return (not not is_save_successful)
+end
+
+
+local REMOVE_LOCAL_STORAGE = [[
+(function() {
+	try {
+		window.localStorage.removeItem('%s');
+		return true;
+	} catch(e) {
+		return false;
+	}
+})()
+]]
+
+---Remove the data from the local storage in HTML5
+---@param path string The path to the data in the local storage
+---@return boolean true if the data was removed successfully, false otherwise
+function M.delete_html5(path)
+	local is_delete_successful = html5.run(string.format(REMOVE_LOCAL_STORAGE, path))
+	return (not not is_delete_successful)
 end
 
 

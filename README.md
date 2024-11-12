@@ -25,10 +25,10 @@
 
 Open your `game.project` file and add the following line to the dependencies field under the project section:
 
-**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/2.zip)**
+**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/3.zip)**
 
 ```
-https://github.com/Insality/defold-saver/archive/refs/tags/2.zip
+https://github.com/Insality/defold-saver/archive/refs/tags/3.zip
 ```
 
 After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
@@ -50,6 +50,7 @@ You should configure the module in the `game.project` file:
 ```ini
 [saver]
 save_name = game.json
+save_folder = Defold Saver
 autosave_timer = 3
 saver_key = saver
 storage_key = storage
@@ -58,6 +59,7 @@ storage_key = storage
 This configuration section for `game.project` defines various settings:
 
 - **save_name**: The name of the save file. Default is `game.json`.
+- **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name (with only alphanumeric, underscores or spaces characters).
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
 - **storage_key**: The key in the save data table that contains the Storage state. Default is `storage`.
@@ -167,6 +169,12 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 	- Update docs, missing API for saver.delete_* functions
 	- Fix error with `get_current_game_project_folder` while using in HTML5 builds
 	- Add `saver.before_save_callback` callback for custom save logic. Can be used to prepare/update data before saving, like transfing from real-time data to save data
+
+### **V3**
+	- BREAKING: HTML5 data now using `sys.serialize` instead `json.encode` due the issue with `json.encode` (sparse arrays, number keys)
+	- BREAKING: Change the way to get the project file name. Now it's removing the spaces and special characters from the project title. To get the previous behavior, you should set the `save_folder` in the `game.project` file.
+	- Add `saver.save_folder` configuration option to README.md.
+	- Fix `saver.delete_file_by_path` for HTML5.
 </details>
 
 

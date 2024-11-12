@@ -29,6 +29,14 @@
 		"socket",
 		"assert_equal",
 		"sys",
-		"html5"
-	]
+		"html5",
+		"defold_saver"
+	],
+	"Lua.format.defaultConfig": {
+		"tab_width": "4",
+		"max_line_length": "140",
+		"line_space_after_function_statement": "fixed(3)",
+		"indent_style": "tab",
+		"indent_size": "4"
+	}
 }

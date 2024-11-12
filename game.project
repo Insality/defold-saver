@@ -23,6 +23,7 @@ include_dirs = saver
 
 [saver]
 save_name = game.json
+save_folder = Defold Saver
 autosave_timer = 0
 saver_key = saver
 storage_key = storage
