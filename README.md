@@ -163,18 +163,21 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 <details>
 
 ### **V1**
-	- Initial release
+- Initial release
 
 ### **V2**
-	- Update docs, missing API for saver.delete_* functions
-	- Fix error with `get_current_game_project_folder` while using in HTML5 builds
-	- Add `saver.before_save_callback` callback for custom save logic. Can be used to prepare/update data before saving, like transfing from real-time data to save data
+- Update docs, missing API for saver.delete_* functions
+- Fix error with `get_current_game_project_folder` while using in HTML5 builds
+- Add `saver.before_save_callback` callback for custom save logic. Can be used to prepare/update data before saving, like transfing from real-time data to save data
 
 ### **V3**
-	- BREAKING: HTML5 data now using `sys.serialize` instead `json.encode` due the issue with `json.encode` (sparse arrays, number keys)
-	- BREAKING: Change the way to get the project file name. Now it's removing the spaces and special characters from the project title. To get the previous behavior, you should set the `save_folder` in the `game.project` file.
-	- Add `saver.save_folder` configuration option to README.md.
-	- Fix `saver.delete_file_by_path` for HTML5.
+- **BREAKING**: HTML5 data now using `sys.serialize` instead `json.encode` due the issue with `json.encode` (sparse arrays, number keys)
+	- I'm not expecting any game in production to use this feature, but if you are using it, please implement migration for your save data
+- **BREAKING**: Change the way to get the project file name. Now it's removing the spaces and special characters from the project title.
+	- To get the previous behavior, you should set the `save_folder` in the `game.project` file.
+
+- Add `saver.save_folder` configuration option to README.md.
+- Fix `saver.delete_file_by_path` for HTML5.
 </details>
 
 
