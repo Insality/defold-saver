@@ -213,7 +213,7 @@ function M.override(source, target)
 end
 
 
----Convert table to lua string
+---Convert table to lua string with stable key ordering
 ---@param tbl table The table to convert
 ---@param indent string|nil The indentation string
 ---@param is_array boolean|nil If the table is an array
@@ -221,45 +221,82 @@ end
 function M.table_to_lua_string(tbl, indent, is_array)
 	indent = indent or ""
 	local result = "{\n"
-	local i = 1
 
+	-- Handle arrays first if it's an array table
+	local array_part = {}
+	local dict_part = {}
+
+	-- Split numeric and string keys
 	for k, v in pairs(tbl) do
-		-- Add indentation
+		if type(k) == "number" and k > 0 and k <= #tbl then
+			array_part[k] = v
+		else
+			dict_part[k] = v
+		end
+	end
+
+	-- Process array part first to maintain order
+	if is_array or #array_part > 0 then
+		for i = 1, #array_part do
+			local v = array_part[i]
+			result = result .. indent .. "    "
+
+			-- Add value based on its type
+			if type(v) == "table" then
+				-- Check if nested table is array-like
+				local v_is_array = #v > 0
+				result = result .. M.table_to_lua_string(v, indent .. "    ", v_is_array)
+			elseif type(v) == "string" then
+				result = result .. string.format("%q", v)
+			else
+				result = result .. tostring(v)
+			end
+			result = result .. ",\n"
+		end
+	end
+
+	-- Get and sort dictionary keys
+	local sorted_keys = {}
+	for k in pairs(dict_part) do
+		table.insert(sorted_keys, k)
+	end
+	table.sort(sorted_keys, function(a, b)
+		-- Convert to strings for comparison
+		return tostring(a) < tostring(b)
+	end)
+
+	-- Process dictionary part with sorted keys
+	for _, k in ipairs(sorted_keys) do
+		local v = dict_part[k]
 		result = result .. indent .. "    "
 
-		-- Add key if it's not an array index
-		if not is_array or type(k) ~= "number" or k ~= i then
-			if type(k) == "string" then
-				-- Write string keys without [" "]
-				result = result .. k
+		-- Format key
+		if type(k) == "string" then
+			if k:match("[^%w_]") then
+				result = result .. "[" .. string.format("%q", k) .. "]"
 			else
-				result = result .. "[" .. k .. "]"
+				result = result .. k
 			end
-			result = result .. " = "
+		else
+			result = result .. "[" .. tostring(k) .. "]"
 		end
+		result = result .. " = "
 
-		-- Add value based on its type
+		-- Format value
 		if type(v) == "table" then
-			-- Recursively handle nested tables
-			-- Check if the table could be an array
-			local v_is_array = type(next(v)) == "number"
+			local v_is_array = #v > 0
 			result = result .. M.table_to_lua_string(v, indent .. "    ", v_is_array)
 		elseif type(v) == "string" then
-			-- Add quotes around string values
 			result = result .. string.format("%q", v)
 		else
-			-- Add other types directly
 			result = result .. tostring(v)
 		end
-
 		result = result .. ",\n"
-		i = i + 1
 	end
 
 	result = result .. indent .. "}"
 	return result
 end
-
 
 local GET_LOCAL_STORAGE = [[
 (function() {
