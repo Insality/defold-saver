@@ -171,7 +171,7 @@ end
 ---@param path string
 ---@return boolean
 function M.save_file_by_path(data, path)
-	return saver_internal.save_to_path(data, path)
+	return saver_internal.save_file_by_path(data, path)
 end
 
 
@@ -179,7 +179,7 @@ end
 ---@param path string
 ---@return table|nil
 function M.load_file_by_path(path)
-	return saver_internal.load_by_path(path)
+	return saver_internal.load_file_by_path(path)
 end
 
 
@@ -187,7 +187,7 @@ end
 ---@param path string
 ---@return boolean
 function M.delete_file_by_path(path)
-	return saver_internal.delete_by_path(path)
+	return saver_internal.delete_file_by_path(path)
 end
 
 

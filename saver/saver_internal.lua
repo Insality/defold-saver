@@ -80,7 +80,7 @@ end
 ---Load the file from internal save directory
 ---@param filepath string The save file path in save directory
 ---@return table|nil The loaded data, or nil if the file can't be loaded
-function M.load_by_path(filepath)
+function M.load_file_by_path(filepath)
 	--- If the game is running in HTML5, then load the data from the local storage
 	if html5 then
 		return M.load_html5(filepath)
@@ -151,7 +151,7 @@ end
 ---Remove file by path
 ---@param filepath string The file path
 ---@return boolean true if the file was removed successfully, false otherwise
-function M.delete_by_path(filepath)
+function M.delete_file_by_path(filepath)
 	if html5 then
 		M.delete_html5(filepath)
 	end
@@ -164,7 +164,7 @@ end
 ---@param data table The save data table
 ---@param filepath string The save file path in save directory
 ---@return boolean true if the file was saved successfully, false otherwise
-function M.save_to_path(data, filepath)
+function M.save_file_by_path(data, filepath)
 	-- If the game is running in HTML5, then save the data to the local storage
 	if html5 then
 		return M.save_html5(data, filepath)
