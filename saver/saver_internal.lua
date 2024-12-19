@@ -2,6 +2,7 @@ local M = {}
 
 --- Use empty function to save a bit of memory
 local EMPTY_FUNCTION = function(_, message, context) end
+local LUA_REQUIRE_AS_STRING = sys.get_config_int("saver.lua_require_as_string", 0) == 1
 
 ---@type saver.logger
 M.empty_logger = {
@@ -118,6 +119,13 @@ function M.load_file_by_path(filepath)
 		end
 
 		if file_data then
+			if LUA_REQUIRE_AS_STRING then
+				-- Replace all require("some.path") to "/some/path.lua"
+				file_data = file_data:gsub('require%("([^"]+)"%)', function(path)
+					return string.format('"/%s"', path:gsub("%.", "/") .. ".lua")
+				end)
+			end
+
 			local is_ok, result_or_error = pcall(load, file_data)
 			if not is_ok then
 				M.logger:error("Can't load the Lua file", result_or_error)
@@ -272,6 +280,7 @@ function M.table_to_lua_string(tbl, indent, is_array)
 
 		-- Format key
 		if type(k) == "string" then
+			-- Check if key needs to be quoted
 			if k:match("[^%w_]") then
 				result = result .. "[" .. string.format("%q", k) .. "]"
 			else
@@ -287,7 +296,12 @@ function M.table_to_lua_string(tbl, indent, is_array)
 			local v_is_array = #v > 0
 			result = result .. M.table_to_lua_string(v, indent .. "    ", v_is_array)
 		elseif type(v) == "string" then
-			result = result .. string.format("%q", v)
+			local is_require = LUA_REQUIRE_AS_STRING and v:sub(-1) == ')' and v:sub(1, 8) == 'require('
+			if is_require then
+				result = result .. v
+			else
+				result = result .. string.format("%q", v)
+			end
 		else
 			result = result .. tostring(v)
 		end
