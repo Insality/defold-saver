@@ -54,15 +54,17 @@ save_folder = Defold Saver
 autosave_timer = 3
 saver_key = saver
 storage_key = storage
+lua_require_as_string = 0
 ```
 
 This configuration section for `game.project` defines various settings:
 
-- **save_name**: The name of the save file. Default is `game.json`.
+- **save_name**: The name of the save file. Default is `game.json`. The file will be stored in the `save_folder` folder. The file extension can be: `.json`, `.lua`, if not specified, the `sys.save` and `sys.load` function will be used to save the data in binary format.
 - **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name (with only alphanumeric, underscores or spaces characters).
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
 - **storage_key**: The key in the save data table that contains the Storage state. Default is `storage`.
+- **lua_require_as_string**: If set to `1`, the `require()` function will load Lua files as strings instead of Lua tables. This is useful for loading external files and processing their paths. The default value is `0`. This setting only affects the Lua format and works for both save and load functions.
 
 ### Core Concepts
 
