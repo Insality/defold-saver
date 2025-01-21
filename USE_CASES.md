@@ -240,3 +240,8 @@ local saver_internal = require("saver.saver_internal")
 saver_internal.json_encode = json.sorted_encode
 ```
 
+## The Saver and Defold userdata
+
+In case your data contains a Defold userdata, like `vmath.vector3`, `hash` etc, you should not use the `json` or `lua` file format, due the userdata will be lost. Use `binary` format instead.
+
+Binary format can be selected by not specifying the format in `saver.save_name` game.project setting.

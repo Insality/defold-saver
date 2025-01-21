@@ -49,7 +49,7 @@ You should configure the module in the `game.project` file:
 
 ```ini
 [saver]
-save_name = game.json
+save_name = game
 save_folder = Defold Saver
 autosave_timer = 3
 saver_key = saver
@@ -59,7 +59,7 @@ lua_require_as_string = 0
 
 This configuration section for `game.project` defines various settings:
 
-- **save_name**: The name of the save file. Default is `game.json`. The file will be stored in the `save_folder` folder. The file extension can be: `.json`, `.lua`, if not specified, the `sys.save` and `sys.load` function will be used to save the data in binary format.
+- **save_name**: The name of the save file. Default is `game`. The file will be stored in the `save_folder` folder. The file extension can be: `.json`, `.lua`, if not specified, the `sys.save` and `sys.load` function will be used to save the data in binary format. Recommended to use binary format (no file extension).
 - **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name (with only alphanumeric, underscores or spaces characters).
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
@@ -73,6 +73,7 @@ Defold Saver uses the following core concepts:
 - **Save State**: A Save state contains a set of table references in the save file. You can bind multiple save states. Bindings is done by the `saver.bind_save_state(id, table_reference)` function. When you bind the table to save state and previous data was saved, the save data will override values in your reference table. So usually you should bind the default table from module or your game data on game loader step.
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
+- **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `binary` format instead. Read more in Use Cases section.
 
 
 ## Basic Usage
