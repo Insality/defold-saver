@@ -80,7 +80,7 @@ end
 
 ---Load the file from internal save directory
 ---@param filepath string The save file path in save directory
----@return table|nil The loaded data, or nil if the file can't be loaded
+---@return table|nil|string The loaded data, or nil if the file can't be loaded
 function M.load_file_by_path(filepath)
 	--- If the game is running in HTML5, then load the data from the local storage
 	if html5 then

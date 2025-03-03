@@ -133,6 +133,9 @@ storage.get(id, [default_value])
 storage.get_number(id, [default_value])
 storage.get_string(id, [default_value])
 storage.get_boolean(id, [default_value])
+storage.get_table(id, [default_value])
+storage.is_exists(id)
+storage.delete(id)
 ```
 
 ### API Reference

@@ -19,6 +19,25 @@ local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage")
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 
+---Persist data between game sessions
+---@class saver.state
+---@field version number
+---@field last_game_version string
+---@field migration_version number
+
+---Whole game state. Add your fields here to inspect all fields
+---@class saver.game_state
+---@field saver saver.state
+---@field storage saver.storage.state
+
+---Logger interface
+---@class saver.logger
+---@field trace fun(logger: saver.logger, message: string, data: any|nil)
+---@field debug fun(logger: saver.logger, message: string, data: any|nil)
+---@field info fun(logger: saver.logger, message: string, data: any|nil)
+---@field warn fun(logger: saver.logger, message: string, data: any|nil)
+---@field error fun(logger: saver.logger, message: string, data: any|nil)
+---
 
 ---@class saver
 local M = {}
@@ -167,7 +186,7 @@ end
 
 
 ---Save the data to the file
----@param data table
+---@param data table|string
 ---@param path string
 ---@return boolean
 function M.save_file_by_path(data, path)
@@ -192,7 +211,7 @@ end
 
 
 ---Save the data to the file by name
----@param data table
+---@param data table|string
 ---@param filename string
 function M.save_file_by_name(data, filename)
 	return M.save_file_by_path(data, M.get_save_path(filename))

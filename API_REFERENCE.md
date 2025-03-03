@@ -28,8 +28,10 @@
   - [storage.get](#storageget)
   - [storage.get_number](#storageget_number)
   - [storage.get_string](#storageget_string)
+  - [storage.get_table](#storageget_table)
   - [storage.get_boolean](#storageget_boolean)
-
+  - [storage.delete](#storagedelete)
+  - [storage.is_exists](#storageis_exists)
 ## Saver
 
 To start using the module in your project, you first need to import it. This can be done with the following line of code:
@@ -592,6 +594,7 @@ This function sets the value of the specified key in the storage. Type of value 
 storage.set("score", 100)
 storage.set("level", "level_1")
 storage.set("is_paused", true)
+storage.set("level_data", { level_id = "level_10" })
 ```
 
 **storage.get**
@@ -615,6 +618,7 @@ This function gets the value of the specified key from the storage. If the key d
 local score = storage.get("score", 0) -- 100
 local level = storage.get("level", "level_1") -- "level_1"
 local is_paused = storage.get("is_paused", false) -- true
+local level_data = storage.get("level_data", { level_id = "level_1" }) -- { level_id = "level_10" }
 ```
 
 **storage.get_number**
@@ -659,6 +663,30 @@ This function gets the value of the specified key from the storage as a string. 
 local level = storage.get_string("level", "level_1") -- "level_1"
 ```
 
+**storage.get_table**
+---
+```lua
+storage.get_table(id, [default_value])
+```
+
+This function gets the value of the specified key from the storage as a table. If the key does not exist or its value is not a table, the default value is returned.
+
+- **Parameters:**
+  - `id`: The key to get the value for.
+  - `default_value`: The default value to return if the key does not exist or its value is not a table. Default is an empty table.
+
+- **Return Value:**
+  - The value of the key as a table, or the default value if the key does not exist or its value is not a table.
+
+- **Usage Example:**
+
+```lua
+local level_data = storage.get_table("level_data", { level_id = "level_1" }) -- If not set, return { level_id = "level_1" }
+local level_data = storage.get_table("level_data") -- If not set, return {}
+```
+
+
+
 **storage.get_boolean**
 ---
 ```lua
@@ -678,4 +706,41 @@ This function gets the value of the specified key from the storage as a boolean.
 
 ```lua
 local is_paused = storage.get_boolean("is_paused", false) -- true
+```
+
+**storage.delete**
+---
+```lua
+storage.delete(id)
+```
+
+This function deletes the value of the specified key from the storage.
+
+- **Parameters:**
+  - `id`: The key to delete the value for.
+
+- **Usage Example:**
+
+```lua
+storage.delete("score")
+```
+
+**storage.is_exists**
+---
+```lua
+storage.is_exists(id)
+```
+
+This function checks if the value of the specified key exists in the storage.
+
+- **Parameters:**
+  - `id`: The key to check the existence of.
+
+- **Return Value:**
+  - `true` if the value exists, `false` otherwise.
+
+- **Usage Example:**
+
+```lua
+local is_exists = storage.is_exists("score") -- true
 ```
