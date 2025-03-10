@@ -9,8 +9,9 @@ local TYPE_BOOLEAN = "boolean"
 local TYPE_TABLE = "table"
 
 ---Persist data between game sessions
+---@deprecated
 ---@class saver.storage.state
----@field storage table<string, saver.storage.value> @The storage data
+---@field storage table<string, saver.storage.value> The storage data
 
 ---One of the values in the storage
 ---@class saver.storage.value
@@ -156,21 +157,6 @@ function M.set(id, value)
 
 	M.state.storage[id] = v
 	return true
-end
-
-
----Delete the value from the storage
----@param id string The record id
-function M.delete(id)
-	M.state.storage[id] = nil
-end
-
-
----Check if the value exists in the storage
----@param id string The record id
----@return boolean @true if the value exists, false otherwise
-function M.is_exists(id)
-	return M.state.storage[id] ~= nil
 end
 
 

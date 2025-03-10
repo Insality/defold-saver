@@ -21,6 +21,7 @@ local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 
 ---Persist data between game sessions
 ---@class saver.state
+---@field storage table<string, any>
 ---@field version number
 ---@field last_game_version string
 ---@field migration_version number
@@ -37,7 +38,6 @@ local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 ---@field info fun(logger: saver.logger, message: string, data: any|nil)
 ---@field warn fun(logger: saver.logger, message: string, data: any|nil)
 ---@field error fun(logger: saver.logger, message: string, data: any|nil)
----
 
 ---@class saver
 local M = {}
@@ -102,6 +102,8 @@ function M.load_game_state(save_name)
 	local path = M.get_save_path(save_name)
 	local game_state = M.load_file_by_path(path)
 	local is_loaded = game_state ~= nil
+	assert(type(game_state) == "table", "Can't load the game state, data is not a table")
+
 	M.set_game_state(game_state or {})
 
 	saver_internal.reset_state()
@@ -152,7 +154,7 @@ end
 
 
 ---Set the save table data
----@param data saver.game_state
+---@param data table
 ---@return boolean
 function M.set_game_state(data)
 	assert(data, "Can't set nil game state")
@@ -371,6 +373,23 @@ function M.apply_migrations()
 	end
 
 	saver_state.migration_version = migrations_count
+end
+
+
+---Get the value from the saver storage.
+---@param storage_id string The storage field name
+---@param default_value any|nil The default value
+---@return any
+function M.get(storage_id, default_value)
+	return M.get_game_state()[SAVER_KEY].storage[storage_id] or default_value
+end
+
+
+---Set the value from the saver storage.
+---@param storage_id string The storage field name
+---@param value any value
+function M.set(storage_id, value)
+	M.get_game_state()[SAVER_KEY].storage[storage_id] = value
 end
 
 
