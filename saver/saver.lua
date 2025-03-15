@@ -102,7 +102,6 @@ function M.load_game_state(save_name)
 	local path = M.get_save_path(save_name)
 	local game_state = M.load_file_by_path(path)
 	local is_loaded = game_state ~= nil
-	assert(type(game_state) == "table", "Can't load the game state, data is not a table")
 
 	M.set_game_state(game_state or {})
 
@@ -179,9 +178,10 @@ function M.bind_save_state(table_key_id, table_reference)
 
 	-- Override the save part if it exists
 	-- Values from previous save part will be copied to the new save part
-	local prev_reference = save_table[table_key_id]
+	local user_table_data = save_table[table_key_id]
 	save_table[table_key_id] = table_reference
-	saver_internal.override(prev_reference, table_reference)
+
+	saver_internal.override(user_table_data, table_reference)
 
 	return table_reference
 end
