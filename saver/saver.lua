@@ -377,11 +377,17 @@ end
 
 
 ---Get the value from the saver storage.
+---@generic T
 ---@param storage_id string The storage field name
----@param default_value any|nil The default value
----@return any
+---@param default_value T? The default value
+---@return T
 function M.get(storage_id, default_value)
-	return M.get_game_state()[SAVER_KEY].storage[storage_id] or default_value
+	local value = M.get_game_state()[SAVER_KEY].storage[storage_id]
+	if value == nil then
+		return default_value
+	end
+
+	return value
 end
 
 
