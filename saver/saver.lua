@@ -376,13 +376,13 @@ function M.apply_migrations()
 end
 
 
----Get the value from the saver storage.
+---Get the value from the saver storage. If the value is not exists, it will return the default value.
 ---@generic T
----@param storage_id string The storage field name
+---@param key_id string The storage field name
 ---@param default_value T? The default value
 ---@return T
-function M.get(storage_id, default_value)
-	local value = M.get_game_state()[SAVER_KEY].storage[storage_id]
+function M.get_value(key_id, default_value)
+	local value = M.get_game_state()[SAVER_KEY].storage[key_id]
 	if value == nil then
 		return default_value
 	end
@@ -392,10 +392,10 @@ end
 
 
 ---Set the value from the saver storage.
----@param storage_id string The storage field name
+---@param key_id string The storage field name
 ---@param value any value
-function M.set(storage_id, value)
-	M.get_game_state()[SAVER_KEY].storage[storage_id] = value
+function M.set_value(key_id, value)
+	M.get_game_state()[SAVER_KEY].storage[key_id] = value
 end
 
 
