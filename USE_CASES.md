@@ -245,3 +245,175 @@ saver_internal.json_encode = json.sorted_encode
 In case your data contains a Defold userdata, like `vmath.vector3`, `hash` etc, you should not use the `json` or `lua` file format, due the userdata will be lost. Use `binary` format instead.
 
 Binary format can be selected by not specifying the format in `saver.save_name` game.project setting.
+
+## How to save binary files and Defold userdata
+
+One of the most powerful features of the **Defold Saver** library is its ability to handle both raw binary data (like images) and Lua tables that contain Defold userdata (like `vmath.vector3` or `hash`). This section demonstrates how to use these features.
+
+### Saving and Loading Raw Binary Data
+
+You can use the Saver library to save and load raw binary data, such as images, audio files, or any other binary file format:
+
+```lua
+local saver = require("saver.saver")
+
+-- Save a PNG image to the save directory
+local function save_image(image_path, save_name)
+    -- Open the original image file
+    local file = io.open(image_path, "rb")
+    if not file then
+        print("Failed to open image file:", image_path)
+        return false
+    end
+    
+    -- Read the binary data
+    local image_data = file:read("*all")
+    file:close()
+    
+    -- Save the binary data using the dedicated function
+    local success = saver.save_binary_data(image_data, save_name)
+    return success
+end
+
+-- Load a saved PNG image from the save directory
+local function load_image(save_name)
+    -- Load the binary data
+    local image_data = saver.load_binary_data(save_name)
+    if not image_data then
+        print("Failed to load saved image:", save_name)
+        return nil
+    end
+    
+    -- Use the image data (in this example, we'll save it to a new file)
+    local output_path = "loaded_" .. save_name
+    local file = io.open(output_path, "wb")
+    if not file then
+        print("Failed to open output file:", output_path)
+        return nil
+    end
+    
+    file:write(image_data)
+    file:close()
+    
+    print("Successfully loaded and saved image to:", output_path)
+    return image_data
+end
+
+-- Usage
+save_image("assets/my_image.png", "saved_image.png")
+load_image("saved_image.png")
+```
+
+### Saving and Loading Lua Tables with Defold Userdata
+
+When working with Lua tables that contain Defold userdata like `vmath.vector3`, `hash`, or other Defold-specific types, you need to use binary format to preserve these values:
+
+```lua
+local saver = require("saver.saver")
+
+-- Save player data including position (vector3) and object ID (hash)
+local function save_player_data(player)
+    local player_data = {
+        position = player.position,       -- vmath.vector3
+        rotation = player.rotation,       -- vmath.quat
+        id = player.id,                  -- hash
+        velocity = player.velocity,      -- vmath.vector3
+        game_objects = player.game_objects -- might contain go.* references
+    }
+    
+    -- Use BINARY format to preserve Defold userdata
+    local success = saver.save_file_by_name(player_data, "player_data", saver.FORMAT.BINARY)
+    return success
+end
+
+-- Load player data
+local function load_player_data()
+    -- Use BINARY format to correctly load Defold userdata
+    local player_data = saver.load_file_by_name("player_data", saver.FORMAT.BINARY)
+    if not player_data then
+        print("Failed to load player data")
+        return nil
+    end
+    
+    -- Now you can safely use the Defold userdata
+    local position = player_data.position -- This is a valid vmath.vector3
+    local id = player_data.id            -- This is a valid hash
+    
+    return player_data
+end
+
+-- Usage example
+local player = {
+    position = vmath.vector3(100, 200, 0),
+    rotation = vmath.quat_rotation_z(math.rad(45)),
+    id = hash("player"),
+    velocity = vmath.vector3(5, 0, 0),
+    game_objects = { main = msg.url("main:/player") }
+}
+
+save_player_data(player)
+local loaded_player = load_player_data()
+
+-- You can now use the loaded data with all userdata intact
+print("Player position:", loaded_player.position)
+```
+
+### Explicitly Selecting Format
+
+If you need more control over the format, you can explicitly specify it when saving or loading files:
+
+```lua
+local saver = require("saver.saver")
+
+-- Available formats
+local JSON_FORMAT = saver.FORMAT.JSON     -- For human-readable JSON files
+local LUA_FORMAT = saver.FORMAT.LUA       -- For Lua files (more flexible than JSON)
+local BINARY_FORMAT = saver.FORMAT.BINARY -- For Lua tables with userdata
+local RAW_FORMAT = saver.FORMAT.RAW       -- For raw binary data
+
+-- Save game settings in JSON format for human readability
+local settings = {
+    music_volume = 0.8,
+    sfx_volume = 1.0,
+    difficulty = "normal",
+    controls = {
+        up = "w",
+        down = "s",
+        left = "a",
+        right = "d"
+    }
+}
+
+-- Save as JSON for human-readability
+saver.save_file_by_name(settings, "settings.json", JSON_FORMAT)
+
+-- Save the same data in Lua format
+saver.save_file_by_name(settings, "settings.lua", LUA_FORMAT)
+
+-- Save the same data in binary format
+saver.save_file_by_name(settings, "settings", BINARY_FORMAT)
+
+-- Load from any format
+local json_settings = saver.load_file_by_name("settings.json", JSON_FORMAT)
+local lua_settings = saver.load_file_by_name("settings.lua", LUA_FORMAT)
+local binary_settings = saver.load_file_by_name("settings", BINARY_FORMAT)
+
+-- You can also let the library auto-detect the format based on file extension
+local auto_json_settings = saver.load_file_by_name("settings.json")
+local auto_lua_settings = saver.load_file_by_name("settings.lua")
+```
+
+### HTML5 Considerations
+
+When using binary data in HTML5 builds, the library automatically handles the encoding and decoding of binary data. This makes the API consistent across all platforms:
+
+```lua
+-- This code works the same way on desktop, mobile, and HTML5 platforms
+local saver = require("saver.saver")
+
+local image_data = saver.load_binary_data("saved_image.png")
+if image_data then
+    -- Process the image data...
+    print("Image loaded, size: " .. #image_data .. " bytes")
+end
+```

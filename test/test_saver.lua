@@ -1,13 +1,13 @@
 return function()
 	describe("Defold Saver", function()
-		local saver = {} --[[@as saver]]
+		local saver ---@type saver
 		local state = {
 			value = 0
 		}
 
 		local load_game_state = function()
 			saver.init()
-			saver.set_logger(nil)
+			--saver.set_logger(nil)
 			saver.bind_save_state("state", state)
 		end
 
@@ -77,6 +77,61 @@ return function()
 				local data2 = saver.load_file_by_path(corrupted_lua)
 				assert(data2 == nil)
 			end
+		end)
+
+		it("Should handle invalid paths gracefully", function()
+			-- Try to save to an invalid directory path
+			local save_result = saver.save_file_by_path({ test = "data" }, "/invalid/directory/path/file.json")
+			assert(save_result == false, "Should return false when saving to invalid path")
+
+			-- Try to load from non-existent path
+			local load_result = saver.load_file_by_path("/non/existent/file.json")
+			assert(load_result == nil, "Should return nil when loading from non-existent path")
+		end)
+
+		it("Should handle edge cases with filenames", function()
+			-- Test with empty filename (should fail gracefully)
+			local result = saver.save_file_by_name({ test = "data" }, "")
+			assert(result == false, "Should handle empty filename gracefully")
+
+			-- Test with very long filename
+			local long_filename = string.rep("a", 200) .. ".json"
+			local long_result = saver.save_file_by_name({ test = "data" }, long_filename)
+			-- We don't assert specific result as it depends on the filesystem,
+			-- but it should not crash
+
+			-- Clean up if saved
+			saver.delete_file_by_name(long_filename)
+		end)
+
+		it("Should handle unusual data types", function()
+			-- Test with nil data (should fail gracefully)
+			local nil_result = saver.save_file_by_name(nil, "nil_test.json")
+			assert(nil_result == false, "Should handle nil data gracefully")
+		end)
+
+		it("Should handle edge cases with game state", function()
+			-- Test binding nil state
+			local original_state = state
+			state = nil
+			saver.bind_save_state("nil_state", state)
+
+			-- Should not crash when saving
+			saver.save_game_state()
+
+			-- Reset state
+			state = original_state
+			saver.bind_save_state("state", state)
+
+			-- Test loading non-existent game state
+			saver.delete_game_state()
+
+			-- Reinitialize default state before loading
+			state = { value = 0 }
+
+			saver.init()
+			saver.bind_save_state("state", state)
+			assert(state.value == 0, "Should initialize with default values when no saved state exists")
 		end)
 	end)
 end
