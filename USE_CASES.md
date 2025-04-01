@@ -271,14 +271,14 @@ local function save_image(image_path, save_name)
     file:close()
     
     -- Save the binary data using the dedicated function
-    local success = saver.save_binary_data(image_data, save_name)
+    local success = saver.save_binary_by_path(image_data, save_name)
     return success
 end
 
 -- Load a saved PNG image from the save directory
 local function load_image(save_name)
     -- Load the binary data
-    local image_data = saver.load_binary_data(save_name)
+    local image_data = saver.load_binary_by_path(save_name)
     if not image_data then
         print("Failed to load saved image:", save_name)
         return nil
@@ -369,7 +369,7 @@ local saver = require("saver.saver")
 local JSON_FORMAT = saver.FORMAT.JSON     -- For human-readable JSON files
 local LUA_FORMAT = saver.FORMAT.LUA       -- For Lua files (more flexible than JSON)
 local BINARY_FORMAT = saver.FORMAT.BINARY -- For Lua tables with userdata
-local RAW_FORMAT = saver.FORMAT.RAW       -- For raw binary data
+local SERIALIZED_FORMAT = saver.FORMAT.SERIALIZED -- For Lua tables with userdata using sys.save/sys.load
 
 -- Save game settings in JSON format for human readability
 local settings = {
@@ -411,7 +411,7 @@ When using binary data in HTML5 builds, the library automatically handles the en
 -- This code works the same way on desktop, mobile, and HTML5 platforms
 local saver = require("saver.saver")
 
-local image_data = saver.load_binary_data("saved_image.png")
+local image_data = saver.load_binary_by_path("saved_image.png")
 if image_data then
     -- Process the image data...
     print("Image loaded, size: " .. #image_data .. " bytes")

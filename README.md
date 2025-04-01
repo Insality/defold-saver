@@ -124,8 +124,8 @@ saver.delete_file_by_path(absolute_file_path)
 saver.save_file_by_name(data, file_name, [format])
 saver.load_file_by_name(file_name, [format])
 saver.delete_file_by_name(file_name)
-saver.save_binary_data(data, filename)
-saver.load_binary_data(filename)
+saver.save_binary_by_path(data, filename)
+saver.load_binary_by_path(filename)
 
 -- Storage
 saver.set_value(key_id, value)
@@ -146,7 +146,7 @@ saver.before_save_callback = function() "Called before saver saves data" end
 saver.FORMAT.JSON
 saver.FORMAT.LUA
 saver.FORMAT.BINARY
-saver.FORMAT.RAW
+saver.FORMAT.SERIALIZED
 
 local storage = require("saver.storage")
 storage.set(id, value)
