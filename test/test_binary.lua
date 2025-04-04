@@ -58,11 +58,11 @@ return function()
 		it("Should save and load binary data", function()
 			if binary_data then
 				-- Save binary data using the dedicated function
-				local save_success = saver.save_binary_by_path(binary_data, test_binary_save_path)
+				local save_success = saver.save_file_by_path(binary_data, test_binary_save_path, saver.FORMAT.BINARY)
 				assert(save_success, "Binary data should be saved successfully")
 
 				-- Load binary data back
-				local loaded_data = saver.load_binary_by_path(test_binary_save_path)
+				local loaded_data = saver.load_file_by_path(test_binary_save_path, saver.FORMAT.BINARY)
 				assert(loaded_data ~= nil, "Binary data should be loaded successfully")
 				assert(#loaded_data == #binary_data, "Loaded binary data should have the same size as original")
 				assert(loaded_data == binary_data, "Loaded binary data should be identical to original")
@@ -143,7 +143,7 @@ return function()
 
 		it("Should handle errors gracefully", function()
 			-- Test loading non-existent files
-			local non_existent_data = saver.load_binary_by_path("non_existent_file.png")
+			local non_existent_data = saver.load_file_by_path("non_existent_file.png", saver.FORMAT.BINARY)
 			assert(non_existent_data == nil, "Non-existent binary file should return nil")
 
 			local non_existent_table = saver.load_file_by_name("non_existent_file.bin", saver.FORMAT.SERIALIZED)
@@ -153,7 +153,7 @@ return function()
 			if project_path then
 				-- Try to load a text file as binary (should fail gracefully)
 				local test_file_path = project_path .. "/test/files/corrupted.json"
-				local corrupted_data = saver.load_binary_by_path(test_file_path)
+				local corrupted_data = saver.load_file_by_path(test_file_path, saver.FORMAT.BINARY)
 				-- We don't assert nil here because it might load as binary string, which is fine
 				-- The important part is that it doesn't crash
 			end

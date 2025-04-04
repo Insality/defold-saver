@@ -133,5 +133,99 @@ return function()
 			saver.bind_save_state("state", state)
 			assert(state.value == 0, "Should initialize with default values when no saved state exists")
 		end)
+
+		it("Should correctly save and load Defold userdata", function()
+			-- Create a player object with various userdata types
+			local player = {
+				position = vmath.vector3(100, 200, 300),
+				rotation = vmath.quat_rotation_z(math.rad(45)),
+				id = hash("player_entity"),
+				velocity = vmath.vector3(5, -2, 0),
+				color = vmath.vector4(1, 0, 0, 0.5),
+				nested = {
+					subposition = vmath.vector3(10, 20, 30),
+					subhash = hash("nested_value")
+				}
+			}
+
+			-- Save using SERIALIZED format which should preserve userdata
+			local save_path = "userdata_test"
+			local save_result = saver.save_file_by_name(player, save_path, saver.FORMAT.SERIALIZED)
+			assert(save_result, "Should successfully save userdata")
+
+			-- Load it back
+			local loaded_player = saver.load_file_by_name(save_path, saver.FORMAT.SERIALIZED)
+			assert(loaded_player ~= nil, "Should load userdata successfully")
+
+			-- Test vector3 properties
+			assert(loaded_player.position.x == 100, "Vector3 position.x should be preserved")
+			assert(loaded_player.position.y == 200, "Vector3 position.y should be preserved")
+			assert(loaded_player.position.z == 300, "Vector3 position.z should be preserved")
+
+			assert(loaded_player.velocity.x == 5, "Vector3 velocity.x should be preserved")
+			assert(loaded_player.velocity.y == -2, "Vector3 velocity.y should be preserved")
+			assert(loaded_player.velocity.z == 0, "Vector3 velocity.z should be preserved")
+
+			-- Test vector4 properties
+			assert(loaded_player.color.x == 1, "Vector4 color.x should be preserved")
+			assert(loaded_player.color.y == 0, "Vector4 color.y should be preserved")
+			assert(loaded_player.color.z == 0, "Vector4 color.z should be preserved")
+			assert(loaded_player.color.w == 0.5, "Vector4 color.w should be preserved")
+
+			-- Test quaternion properties (checking w component as a simple test)
+			-- cos(45°/2) = ~0.9238
+			assert(math.abs(loaded_player.rotation.w - math.cos(math.rad(45)/2)) < 0.0001,
+				"Quaternion rotation.w should be preserved")
+
+			-- Test hash
+			assert(loaded_player.id == hash("player_entity"), "Hash id should be preserved")
+
+			-- Test nested userdata
+			assert(loaded_player.nested.subposition.x == 10, "Nested vector3 x should be preserved")
+			assert(loaded_player.nested.subposition.y == 20, "Nested vector3 y should be preserved")
+			assert(loaded_player.nested.subposition.z == 30, "Nested vector3 z should be preserved")
+			assert(loaded_player.nested.subhash == hash("nested_value"), "Nested hash should be preserved")
+
+			-- Test JSON format (should lose userdata properties)
+			local json_path = "userdata_test.json"
+			saver.save_file_by_name(player, json_path)
+			local json_loaded = saver.load_file_by_name(json_path)
+
+			-- JSON format should not preserve userdata types
+			assert(type(json_loaded.position) ~= "userdata", "JSON format should not preserve userdata types")
+
+			-- Clean up
+			saver.delete_file_by_name(save_path)
+			saver.delete_file_by_name(json_path)
+		end)
+
+		it("Should save and load binary data with renamed functions", function()
+			-- Create some binary data (a simple string in this case)
+			local binary_data = string.char(0x01, 0x02, 0x03, 0x04, 0xFF, 0xFE, 0xFD, 0xFC)
+
+			-- Test save_binary_by_path and load_binary_by_path
+			local binary_path = "binary_test.bin"
+			local save_result = saver.save_file_by_path(binary_data, binary_path, saver.FORMAT.BINARY)
+			assert(save_result, "Should successfully save binary data")
+
+			local loaded_data = saver.load_file_by_path(binary_path, saver.FORMAT.BINARY)
+			assert(loaded_data ~= nil, "Should load binary data successfully")
+			assert(#loaded_data == #binary_data, "Binary data length should match")
+			assert(loaded_data == binary_data, "Binary data content should match exactly")
+
+			-- Test backward compatibility functions (save_binary and load_binary)
+			local compat_path = "binary_compat_test.bin"
+			local compat_save_result = saver.save_file_by_path(binary_data, compat_path, saver.FORMAT.BINARY)
+			assert(compat_save_result, "Should successfully save binary data with legacy function")
+
+			local compat_loaded_data = saver.load_file_by_path(compat_path, saver.FORMAT.BINARY)
+			assert(compat_loaded_data ~= nil, "Should load binary data successfully with legacy function")
+			assert(#compat_loaded_data == #binary_data, "Binary data length should match with legacy function")
+			assert(compat_loaded_data == binary_data, "Binary data content should match exactly with legacy function")
+
+			-- Clean up
+			saver.delete_file_by_name(binary_path)
+			saver.delete_file_by_name(compat_path)
+		end)
 	end)
 end

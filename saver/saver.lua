@@ -330,34 +330,6 @@ function M.delete_file_by_name(filename)
 end
 
 
----Save binary data (like images or other non-Lua tables)
----		-- Save a PNG image (binary data)
----		local file = io.open("my_image.png", "rb")
----		local image_data = file:read("*all")
----		file:close()
----
----		saver.save_binary_by_path(image_data, "saved_image.png")
----@param data string The binary data to save
----@param filename string The file name to save the data to
----@return boolean true if the data was saved successfully
-function M.save_binary_by_path(data, filename)
-	return M.save_file_by_path(data, filename, M.FORMAT.BINARY)
-end
-
-
----Load binary data (like images or other non-Lua tables)
----		-- Load a PNG image (binary data)
----		local image_data = saver.load_binary_by_path("saved_image.png")
----		-- Use the image data
----@param filename string The file name to load the data from
----@return string|nil The binary data or nil if the file can't be loaded
-function M.load_binary_by_path(filename)
-	local data = M.load_file_by_path(filename, M.FORMAT.BINARY)
-	---@cast data string
-	return data
-end
-
-
 ---This function returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
 ---		local file_path = saver.get_save_path("data.json")
 ---		print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"

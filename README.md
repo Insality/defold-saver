@@ -124,8 +124,12 @@ saver.delete_file_by_path(absolute_file_path)
 saver.save_file_by_name(data, file_name, [format])
 saver.load_file_by_name(file_name, [format])
 saver.delete_file_by_name(file_name)
-saver.save_binary_by_path(data, filename)
-saver.load_binary_by_path(filename)
+
+-- File format constants
+saver.FORMAT.JSON -- "json", save and load as JSON
+saver.FORMAT.LUA -- "lua", save and load as Lua
+saver.FORMAT.SERIALIZED -- "serialized", save and load as Lua serialized table
+saver.FORMAT.BINARY -- "binary", save and load as binary
 
 -- Storage
 saver.set_value(key_id, value)
@@ -140,13 +144,6 @@ saver.apply_migrations()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
 saver.before_save_callback = function() "Called before saver saves data" end
-
-
--- File format constants
-saver.FORMAT.JSON
-saver.FORMAT.LUA
-saver.FORMAT.BINARY
-saver.FORMAT.SERIALIZED
 
 local storage = require("saver.storage")
 storage.set(id, value)
