@@ -18,6 +18,7 @@
 - **Migrations**: Apply migrations to data when the migration version changed.
 - **Storage**: Store key-value pairs in the save data.
 - **Format support**: Save and load data in JSON, Lua or binary format.
+- **Binary Data**: Save and load both Lua tables and raw binary data (like images) with dedicated API.
 
 ## Setup
 
@@ -74,7 +75,8 @@ Defold Saver uses the following core concepts:
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
 - **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `binary` format instead. Read more in Use Cases section.
-- **Binary Data Handling**: The library provides functions for handling binary data (like images or other non-Lua tables data) and Lua tables that contain Defold userdata. Use explicity `binary` format for binary data and `saver.save_file_by_name`/`saver.load_file_by_name`
+- **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables) and Lua tables that contain Defold userdata. Use `saver.save_binary_data`/`saver.load_binary_data` for raw binary data and `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for Lua tables with userdata.
+
 
 ## Basic Usage
 
@@ -105,6 +107,8 @@ end
 
 ```lua
 local saver = require("saver.saver")
+
+-- Main functions
 saver.init()
 saver.bind_save_state(table_key_id, table_reference)
 saver.save_game_state([save_name])
@@ -112,12 +116,27 @@ saver.load_game_state([save_name])
 saver.set_game_state(game_state)
 saver.get_game_state()
 saver.delete_game_state([save_name])
-saver.save_file_by_path(data, absolute_file_path)
-saver.load_file_by_path(absolute_file_path)
+
+-- File Handling
+saver.save_file_by_path(data, absolute_file_path, [format])
+saver.load_file_by_path(absolute_file_path, [format])
 saver.delete_file_by_path(absolute_file_path)
-saver.save_file_by_name(data, file_name)
-saver.load_file_by_name(file_name)
+saver.save_file_by_name(data, file_name, [format])
+saver.load_file_by_name(file_name, [format])
 saver.delete_file_by_name(file_name)
+
+-- File format constants
+saver.FORMAT.JSON -- "json", save and load as JSON
+saver.FORMAT.LUA -- "lua", save and load as Lua
+saver.FORMAT.SERIALIZED -- "serialized", save and load as Lua serialized table
+saver.FORMAT.BINARY -- "binary", save and load binary data, not a Lua table
+
+-- Storage
+saver.set_value(key_id, value)
+saver.get_value(key_id, [default_value])
+saver.is_value_exists(key_id)
+
+-- Other
 saver.set_autosave_timer(seconds)
 saver.get_save_path(file_name)
 saver.get_save_version()
@@ -125,10 +144,9 @@ saver.set_migrations(migration_list)
 saver.apply_migrations()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
-saver.set_value(key_id, value)
-saver.get_value(key_id, [default_value])
 saver.before_save_callback = function() "Called before saver saves data" end
 
+---@deprecated Use `saver.set_value` and `saver.get_value` instead
 local storage = require("saver.storage")
 storage.set(id, value)
 storage.get(id, [default_value])
@@ -186,6 +204,12 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 
 - Add `saver.save_folder` configuration option to README.md.
 - Fix `saver.delete_file_by_path` for HTML5.
+
+### **V4**
+- Add binary data handling with explicit API for different file formats
+- Better file format detection and improved internal implementation
+- More consistent API for saving and loading files
+- Deprecated `saver.storage` module, use `saver.set_value` and `saver.get_value` instead
 </details>
 
 

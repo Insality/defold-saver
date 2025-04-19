@@ -31,6 +31,14 @@ M.GAME_STATE = nil
 -- Persistent storage for saver table
 M.state = nil
 
+--- File format constants
+M.FORMAT = {
+	JSON = "json",
+	LUA = "lua",
+	SERIALIZED = "serialized", -- For Lua tables (with userdata) saved using sys.save/sys.load
+	BINARY = "binary" -- For raw binary data (images, etc.)
+}
+
 function M.reset_state()
 	M.state = {
 		storage = {},
@@ -85,6 +93,198 @@ function M.parse_game_version(version)
 end
 
 
+---Detect file format based on file path and content type
+---@param filepath string The file path
+---@param data any The data to save (optional, for saving)
+---@return string format The file format (json, lua, binary, raw)
+function M.detect_format(filepath, data)
+	if filepath:sub(-5) == ".json" then
+		return M.FORMAT.JSON
+	elseif filepath:sub(-4) == ".lua" then
+		return M.FORMAT.LUA
+	else
+		-- For saving: determine if it's a Lua table (binary) or raw binary data
+		if data ~= nil and type(data) ~= "table" then
+			return M.FORMAT.BINARY
+		else
+			return M.FORMAT.SERIALIZED
+		end
+	end
+end
+
+
+---Save data in JSON format
+---@param data table The data to save
+---@param filepath string The file path
+---@return boolean success Whether the save was successful
+function M.save_json(data, filepath)
+	local file = io.open(filepath, "w+")
+	if not file then
+		M.logger:error("Can't open file for writing", filepath)
+		return false
+	end
+
+	file:write(M.json_encode(data))
+	file:close()
+	return true
+end
+
+
+---Load data in JSON format
+---@param filepath string The file path
+---@return table|nil data The loaded data or nil if failed
+function M.load_json(filepath)
+	local file = io.open(filepath)
+	if not file then
+		M.logger:debug("JSON file does not exist", filepath)
+		return nil
+	end
+
+	local file_data = file:read("*all")
+	file:close()
+
+	if not file_data then
+		M.logger:error("Empty JSON file", filepath)
+		return nil
+	end
+
+	local is_ok, result_or_error = pcall(json.decode, file_data)
+	if not is_ok then
+		M.logger:error("Can't parse the JSON file", result_or_error)
+		return nil
+	end
+
+	return result_or_error
+end
+
+
+---Save data in Lua format
+---@param data table The data to save
+---@param filepath string The file path
+---@return boolean success Whether the save was successful
+function M.save_lua(data, filepath)
+	local file = io.open(filepath, "w+")
+	if not file then
+		M.logger:error("Can't open file for writing", filepath)
+		return false
+	end
+
+	local filedata = "return " .. M.table_to_lua_string(data)
+	file:write(filedata)
+	file:close()
+	return true
+end
+
+
+---Load data in Lua format
+---@param filepath string The file path
+---@return table|nil data The loaded data or nil if failed
+function M.load_lua(filepath)
+	local file = io.open(filepath)
+	if not file then
+		M.logger:debug("Lua file does not exist", filepath)
+		return nil
+	end
+
+	local file_data = file:read("*all")
+	file:close()
+
+	if not file_data then
+		M.logger:error("Empty Lua file", filepath)
+		return nil
+	end
+
+	if LUA_REQUIRE_AS_STRING then
+		-- Replace all require("some.path") to "/some/path.lua"
+		file_data = file_data:gsub('require%("([^"]+)"%)', function(path)
+			return string.format('"/%s"', path:gsub("%.", "/") .. ".lua")
+		end)
+	end
+
+	local is_ok, result_or_error = pcall(load, file_data)
+	if not is_ok then
+		M.logger:error("Can't load the Lua file", result_or_error)
+		return nil
+	end
+
+	if result_or_error then
+		local parse_ok, parsed_data = pcall(result_or_error)
+		if parse_ok and parsed_data and type(parsed_data) == "table" then
+			return parsed_data
+		else
+			M.logger:error("Can't parse the Lua file", parsed_data)
+			return nil
+		end
+	end
+
+	return nil
+end
+
+
+---Save data in serialized format (for Lua tables with userdata)
+---@param data table The data to save
+---@param filepath string The file path
+---@return boolean success Whether the save was successful
+function M.save_serialized(data, filepath)
+	local success, result = pcall(sys.save, filepath, data)
+	if not success then
+		M.logger:error("Failed to save serialized file", { filepath = filepath, error = result })
+		return false
+	end
+	return result
+end
+
+
+---Load data in serialized format (for Lua tables with userdata)
+---@param filepath string The file path
+---@return table|nil data The loaded data or nil if failed
+function M.load_serialized(filepath)
+	if not sys.exists(filepath) then
+		M.logger:debug("Serialized file does not exist", filepath)
+		return nil
+	end
+
+	local success, result = pcall(sys.load, filepath)
+	if not success then
+		M.logger:error("Failed to load serialized file", { filepath = filepath, error = result })
+		return nil
+	end
+	return result
+end
+
+
+---Save raw binary data
+---@param data string The binary data to save
+---@param filepath string The file path
+---@return boolean success Whether the save was successful
+function M.save_binary(data, filepath)
+	local file = io.open(filepath, "wb")
+	if not file then
+		M.logger:error("Can't open file for writing", filepath)
+		return false
+	end
+
+	file:write(data)
+	file:close()
+	return true
+end
+
+
+---Load raw binary data
+---@param filepath string The file path
+---@return string|nil data The loaded data or nil if failed
+function M.load_binary(filepath)
+	local file = io.open(filepath, "rb")
+	if not file then
+		M.logger:debug("Binary file does not exist", filepath)
+		return nil
+	end
+
+	local data = file:read("*all")
+	file:close()
+	return data
+end
+
 ---Load the file from internal save directory
 ---@param filepath string The save file path in save directory
 ---@return table|string|nil result The loaded data, or nil if the file can't be loaded
@@ -94,72 +294,20 @@ function M.load_file_by_path(filepath)
 		return M.load_html5(filepath)
 	end
 
-	-- If the file ext is JSON, then load it as JSON
-	if filepath:sub(-5) == ".json" then
-		local file_data = nil
-		local file = io.open(filepath)
-		if file then
-			file_data = file:read("*all")
-			file:close()
-		end
+	local format = M.detect_format(filepath)
 
-		if file_data then
-			local is_ok, result_or_error = pcall(json.decode, file_data)
-			if not is_ok then
-				M.logger:error("Can't parse the JSON file", result_or_error)
-				return nil
-			end
-
-			local parsed_data = result_or_error
-			if parsed_data and type(parsed_data) == "table" then
-				return parsed_data
-			end
-		end
-
-		return nil
-	elseif filepath:sub(-4) == ".lua" then
-		local file_data = nil
-		local file = io.open(filepath)
-		if file then
-			file_data = file:read("*all")
-			file:close()
-		end
-
-		if file_data then
-			if LUA_REQUIRE_AS_STRING then
-				-- Replace all require("some.path") to "/some/path.lua"
-				file_data = file_data:gsub('require%("([^"]+)"%)', function(path)
-					return string.format('"/%s"', path:gsub("%.", "/") .. ".lua")
-				end)
-			end
-
-			local is_ok, result_or_error = pcall(load, file_data)
-			if not is_ok then
-				M.logger:error("Can't load the Lua file", result_or_error)
-				return nil
-			end
-
-			if result_or_error then
-				local parse_ok, parsed_data = pcall(result_or_error)
-				if parse_ok and parsed_data and type(parsed_data) == "table" then
-					return parsed_data
-				else
-					M.logger:error("Can't parse the Lua file", parsed_data)
-					return nil
-				end
-			end
-		end
-
-		return nil
-	else
-		local is_exists = sys.exists(filepath)
-		if not is_exists then
-			M.logger:debug("The file is not exists", filepath)
-			return nil
-		end
-
-		return sys.load(filepath)
+	if format == M.FORMAT.JSON then
+		return M.load_json(filepath)
+	elseif format == M.FORMAT.LUA then
+		return M.load_lua(filepath)
+	elseif format == M.FORMAT.SERIALIZED then
+		return M.load_serialized(filepath)
+	elseif format == M.FORMAT.BINARY then
+		-- For binary format, directly load as raw binary
+		return M.load_binary(filepath)
 	end
+
+	return nil
 end
 
 
@@ -176,41 +324,34 @@ end
 
 
 ---Save the data in save directory
----@param data table The save data table
+---@param data table|string The save data table or binary data
 ---@param filepath string The save file path in save directory
+---@param format string|nil Explicit format override (json, lua, serialized, binary)
 ---@return boolean true if the file was saved successfully, false otherwise
-function M.save_file_by_path(data, filepath)
+function M.save_file_by_path(data, filepath, format)
 	-- If the game is running in HTML5, then save the data to the local storage
 	if html5 then
 		return M.save_html5(data, filepath)
 	end
 
-	if filepath:sub(-5) == ".json" then
-		local file = io.open(filepath, "w+")
+	format = format or M.detect_format(filepath, data)
 
-		if file then
-			file:write(M.json_encode(data))
-			file:close()
-			return true
-		else
-			M.logger:error("Can't save the file to save directory", filepath)
-			return false
-		end
-	elseif filepath:sub(-4) == ".lua" then
-		local file = io.open(filepath, "w+")
-		if file then
-			local filedata = "return " .. M.table_to_lua_string(data)
-			file:write(filedata)
-			file:close()
-			return true
-		else
-			M.logger:error("Can't save the file to save directory", filepath)
-			return false
-		end
-	else
-		-- In other cases, use sys.save as binary format
-		return sys.save(filepath, data)
+	if format == M.FORMAT.JSON then
+		---@cast data table
+		return M.save_json(data, filepath)
+	elseif format == M.FORMAT.LUA then
+		---@cast data table
+		return M.save_lua(data, filepath)
+	elseif format == M.FORMAT.SERIALIZED then
+		---@cast data table
+		return M.save_serialized(data, filepath)
+	elseif format == M.FORMAT.BINARY then
+		---@cast data string
+		return M.save_binary(data, filepath)
 	end
+
+	M.logger:error("Unknown format for saving", format)
+	return false
 end
 
 
@@ -362,12 +503,20 @@ local SET_LOCAL_STORAGE = [[
 ]]
 
 ---Save the data to the local storage in HTML5
----@param data table The data to save
+---@param data table|string The data to save
 ---@param path string The path to the data in the local storage
 ---@return boolean true if the data was saved successfully, false otherwise
 function M.save_html5(data, path)
-	local encoded_data = defold_saver.encode_base64(sys.serialize(data))
+	if type(data) ~= "table" then
+		-- For non-table data (like raw binary), we need to encode it to base64 first
+		local encoded_data = defold_saver.encode_base64(data)
+		local html_command = string.format(SET_LOCAL_STORAGE, path, encoded_data)
+		local is_save_successful = html5.run(html_command)
+		return (not not is_save_successful)
+	end
 
+	-- For tables, use the existing serialization
+	local encoded_data = defold_saver.encode_base64(sys.serialize(data))
 	local html_command = string.format(SET_LOCAL_STORAGE, path, encoded_data)
 	local is_save_successful = html5.run(html_command)
 	return (not not is_save_successful)
