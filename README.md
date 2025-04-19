@@ -74,7 +74,7 @@ Defold Saver uses the following core concepts:
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
 - **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `binary` format instead. Read more in Use Cases section.
-
+- **Binary Data Handling**: The library provides functions for handling binary data (like images or other non-Lua tables data) and Lua tables that contain Defold userdata. Use explicity `binary` format for binary data and `saver.save_file_by_name`/`saver.load_file_by_name`
 
 ## Basic Usage
 

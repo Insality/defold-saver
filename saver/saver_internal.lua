@@ -62,9 +62,15 @@ end
 ---Encode the data to JSON.
 ---Overwrite this function if you want to use another JSON library
 ---@param data table The data to encode
----@return string The JSON encoded string
+---@return string? The JSON encoded string
 function M.json_encode(data)
-	return json.encode(data)
+	local encoded_data = json.encode(data)
+	if encoded_data then
+		return encoded_data
+	end
+
+	M.logger:error("Failed to encode the data to JSON", data)
+	return nil
 end
 
 
