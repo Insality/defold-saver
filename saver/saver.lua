@@ -55,15 +55,22 @@ M.FORMAT = {
 	BINARY = "binary"     -- For raw binary data (images, files, etc)
 }
 
----@param logger_instance saver.logger|table|nil
+---Customize the logging mechanism used by Defold Saver.
+---You can use Defold Log library or provide a custom logger.
+---		local log = require("log.log")
+---		local saver = require("saver.saver")
+---
+---		saver.set_logger(log.get_logger("saver"))
+---@param logger_instance saver.logger|table|nil A logger object that follows the specified logging interface, including methods for trace, debug, info, warn, error. Pass nil to remove the default logger.
 function M.set_logger(logger_instance)
 	saver_internal.logger = logger_instance or saver_internal.empty_logger
 end
 
 
----Initialize the saver. Should be called on the game start
----If you have the migrations, call migrations.set_migrations(...) before this
----Autosave will be scheduled if AUTOSAVE_TIMER > 0
+---Initialize the Saver module. Should be called at the start of your game to set up the module.
+---Call it after saver.set_migrations if you are using migrations.
+---This function loads the game state from a file and starts the autosave timer.
+---If the game state file does not exist, a new game state is created.
 ---		saver.init()
 function M.init()
 	M.load_game_state()
@@ -74,14 +81,14 @@ function M.init()
 end
 
 
----Save the game
+---Save the current game state to a file. If no file name is provided, the default file name specified in the game.project file is used.
 ---		-- Save the game with default name
 ---		saver.save_game_state()
 ---
 ---		-- Save the game with custom name
 ---		saver.save_game_state("custom_save")
----@param save_name string|nil The save name. If not passed, will use default from settings
----@return boolean true if the file was saved successfully, false otherwise
+---@param save_name string|nil The name of the file to save the game state to. Default is the file name specified in the game.project file under the saver.save_file key.
+---@return boolean true if the game state was saved successfully, false otherwise.
 function M.save_game_state(save_name)
 	if M.before_save_callback then
 		M.before_save_callback()
@@ -107,14 +114,14 @@ function M.save_game_state(save_name)
 end
 
 
----Load the game state from the file by name
+---Load the game state from a file. If no file name is provided, the default file name specified in the game.project file is used.
 ---		-- Load the game state with default name
 ---		local is_loaded = saver.load_game_state()
 ---
 ---		-- Load the game state with custom name
 ---		local is_loaded = saver.load_game_state("custom_save")
----@param save_name string|nil The save name. If not passed, will use default from settings
----@return boolean True if the game state is loaded, false if the new game state is created
+---@param save_name string|nil The name of the file to load the game state from. Default is the file name specified in the game.project file.
+---@return boolean True if the game state was loaded successfully, false if the new game state is created
 function M.load_game_state(save_name)
 	save_name = save_name or SAVE_NAME
 
@@ -146,15 +153,15 @@ function M.load_game_state(save_name)
 end
 
 
----Delete the game state file. Doesn't affect the current game state
----If autosave is enabled, it will be rescheduled, so probably you want to immediately restart the game
+---Delete the game state file. Doesn't affect the current game state.
+---If autosave is enabled, it will be rescheduled, so probably you want to immediately restart the game.
 ---		-- Delete the game state with default name
 ---		saver.delete_game_state()
 ---
 ---		-- Delete the game state with custom name
 ---		saver.delete_game_state("custom_save")
----@param save_name string|nil The save name. If not passed, will use default from settings
----@return boolean true if the file was deleted successfully, false otherwise
+---@param save_name string|nil The name of the file to delete the game state from. Default is the file name specified in the game.project file.
+---@return boolean true if the game state was deleted successfully, false otherwise.
 function M.delete_game_state(save_name)
 	save_name = save_name or SAVE_NAME
 
@@ -171,21 +178,21 @@ function M.delete_game_state(save_name)
 end
 
 
----Get the save table
+---Returns the current game state.
 ---		local game_state = saver.get_game_state()
 ---		pprint(game_state)
----@return saver.game_state The current game state
+---@return saver.game_state The current game state.
 function M.get_game_state()
 	return saver_internal.GAME_STATE
 end
 
 
----Set the save table data
+---Sets the current game state to the specified state.
 ---		local game_state = saver.get_game_state()
 ---		game_state.game.level = 5
 ---		saver.set_game_state(game_state)
----@param data table The game state data to set
----@return boolean true if the game state was set successfully
+---@param data table The state to set the game state to.
+---@return boolean true if the game state was set successfully, false otherwise.
 function M.set_game_state(data)
 	assert(data, "Can't set nil game state")
 	saver_internal.GAME_STATE = data
@@ -193,7 +200,9 @@ function M.set_game_state(data)
 end
 
 
----Load and override the table_reference. The reference on the table keeps the same
+---Binds a table reference as a part of the game state. When the game state is saved, all table references will be saved.
+---This is a main function to use to save your game state. You can bind multiple tables to different parts of the game state.
+---After binding, the table_reference will be updated with the saved data if it exists.
 ---		local game_state = {
 ---			level = 1,
 ---			money = 100
@@ -203,8 +212,8 @@ end
 ---
 ---		-- If we have previously saved game state, the game_state will be changed to the saved data
 ---		print(game_state.level) -- 5 (if it was saved before)
----@param table_key_id string The save state id to save
----@param table_reference table The save state table
+---@param table_key_id string The table key to set the value for.
+---@param table_reference table The table reference to bind to the game state.
 ---@return table table_reference The table_reference
 function M.bind_save_state(table_key_id, table_reference)
 	local save_table = M.get_game_state()
@@ -227,7 +236,7 @@ function M.bind_save_state(table_key_id, table_reference)
 end
 
 
----Save the data to the file
+---Saves the specified data to a file at the specified path. The data format is chosen by file path extension.
 ---		local data = {
 ---			score = 100,
 ---			level = 1
@@ -238,26 +247,26 @@ end
 ---		-- Use path to the resources folder
 ---		local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 ---		saver.save_file_by_path(data, file_path)
----@param data table|string The save data table or string if the data is already encoded (or binary)
----@param path string The save file path
+---@param data table|string The lua table to save to the file.
+---@param path string The absolute path to save the file to. Contains the file name and extension. Extension can be empty, .json or .lua
 ---@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension or data type.
----@return boolean true if the file was saved successfully, false otherwise
+---@return boolean true if the file was saved successfully, false otherwise.
 function M.save_file_by_path(data, path, format)
 	return saver_internal.save_file_by_path(data, path, format)
 end
 
 
----Load the data from the file
+---Loads the data from a file at the specified path.
 ---		-- Get project path works on build from the Defold Editor only
 ---		local project_path = saver.get_current_game_project_folder()
 ---		-- Use path to the resources folder
 ---		local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 ---		local data = saver.load_file_by_path(file_path)
 ---		pprint(data)
----@param path string The file path
+---@param path string The absolute path to load the file from. Contains the file name and extension.
 ---@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension.
 ---  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
----@return table|string|nil The loaded data, or nil if the file can't be loaded
+---@return table|string|nil The data loaded from the file. If the file does not exist, returns nil.
 function M.load_file_by_path(path, format)
 	if format then
 		if format == M.FORMAT.JSON then
@@ -274,15 +283,15 @@ function M.load_file_by_path(path, format)
 end
 
 
----Delete the file
----@param path string
----@return boolean
+---Deletes the file at the specified path.
+---@param path string The absolute path to the file to delete. Contains the file name and extension.
+---@return boolean true if the file was deleted successfully, false otherwise.
 function M.delete_file_by_path(path)
 	return saver_internal.delete_file_by_path(path)
 end
 
 
----Save the data to the file by name
+---Saves the specified data to a file with the specified name. The file is saved in the game save folder. Filename supports subfolders.
 ---		local data = {
 ---			score = 100,
 ---			level = 1
@@ -290,10 +299,10 @@ end
 ---
 ---		-- Save the data to the game save folder
 ---		saver.save_file_by_name(data, "data.json")
----@param data table|string
----@param filename string
+---@param data table|string The lua table to save to the file.
+---@param filename string The name of the file to save the data to. Can contain subfolders.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
----@return boolean true if the save was successful
+---@return boolean true if the file was saved successfully, false otherwise.
 function M.save_file_by_name(data, filename, format)
 	if data == nil then
 		saver_internal.logger:error("Cannot save nil data", { filename = filename })
@@ -309,28 +318,28 @@ function M.save_file_by_name(data, filename, format)
 end
 
 
----Load the data from the file by name
+---Loads the data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
 ---		local data = saver.load_file_by_name("data.json")
 ---		pprint(data)
----@param filename string
+---@param filename string The name of the file to load the data from. Can contain subfolders.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
 ---  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
----@return table|string|nil
+---@return table|string|nil The data loaded from the file. If the file does not exist, returns nil.
 function M.load_file_by_name(filename, format)
 	return M.load_file_by_path(M.get_save_path(filename), format)
 end
 
 
----Delete the file by name
+---Deletes the file with the specified name. The file is deleted from the game save folder. Filename supports subfolders.
 ---		saver.delete_file_by_name("data.json")
----@param filename string
----@return boolean
+---@param filename string The name of the file to delete. Can contain subfolders.
+---@return boolean true if the file was deleted successfully, false otherwise.
 function M.delete_file_by_name(filename)
 	return M.delete_file_by_path(M.get_save_path(filename))
 end
 
 
----This function returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
+---Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
 ---		local file_path = saver.get_save_path("data.json")
 ---		print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"
 ---
@@ -353,19 +362,20 @@ function M.get_save_path(filename)
 end
 
 
----Return current save version. Useful for check which save data is newer
+---Returns the current save version of the game state. The save version is used to check if the game state is older than the current version. The save version increments when the game state is saved.
 ---		local save_version = saver.get_save_version()
 ---		print(save_version)
----@return number The current save version
+---@return number The current save version of the game state.
 function M.get_save_version()
 	return M.get_game_state()[SAVER_KEY].version
 end
 
 
----Set the autosave timer
+---Sets the autosave timer to the specified number of seconds. The autosave timer is used to automatically save the game state at regular intervals.
+---Use 0 to disable autosave.
 ---		saver.set_autosave_timer(5) -- Autosave every 5 seconds
 ---		saver.set_autosave_timer(0) -- Disable autosave
----@param timer number The timer in seconds, 0 to disable
+---@param timer number The number of seconds between autosaves. Use 0 to disable autosave.
 function M.set_autosave_timer(timer)
 	AUTOSAVE_TIMER = timer
 	M.schedule_autosave()
@@ -422,10 +432,11 @@ function M.check_game_version()
 end
 
 
----Get current folder with Defold project (only desktop)
+---Returns the absolute path to the current game project folder. It is useful when you need to save or load files from the game project folder at development.
+---Returns nil if the game project folder is not found. Used only at desktop platforms and if game started from the Defold Editor.
 ---		local project_folder = saver.get_current_game_project_folder()
 ---		print(project_folder) -- "/Users/user/projects/my_game"
----@return string|nil Current project folder or nil if can't get it
+---@return string|nil The absolute path to the current game project folder. Nil if the game.project folder is not found.
 function M.get_current_game_project_folder()
 	if not io.popen or html5 then
 		return nil
@@ -455,8 +466,9 @@ function M.get_current_game_project_folder()
 end
 
 
----Set the migrations table
----Set before saver.init() call
+---Sets the list of migrations to apply after loading the game state manually with saver.apply_migrations() function.
+---Migrations are used to update the game state in case of changes to the game state structure.
+---Migrations are applied in order. Each migration should be a function that takes the game state as a parameter and returns the updated game state.
 ---		local migrations = {
 ---			function(game_state, logger)
 ---				-- Assume we have new level_data field in the game state and we need to move level and score to it
@@ -485,8 +497,7 @@ function M.set_migrations(migrations_table)
 end
 
 
----Migrations should be already applied before saver.load call
----with saver.set_migrations(...)
+---Applies the migrations set by saver.set_migrations function. It should be called after loading the game state manually with saver.init() function.
 ---		saver.apply_migrations()
 function M.apply_migrations()
 	local game_state = M.get_game_state()
@@ -504,7 +515,7 @@ function M.apply_migrations()
 end
 
 
----Get the value from the saver storage. If the value is not exists, it will return the default value.
+---Gets the value from the saver storage. If the value does not exist, it will return the default value.
 ---@generic T
 ---@param key_id string The storage field name
 ---@param default_value T? The default value
@@ -519,7 +530,7 @@ function M.get_value(key_id, default_value)
 end
 
 
----Set the value from the saver storage.
+---Sets the value in the saver storage.
 ---@param key_id string The storage field name
 ---@param value any value
 function M.set_value(key_id, value)
@@ -527,12 +538,22 @@ function M.set_value(key_id, value)
 end
 
 
----Check if the value exists in the saver storage.
+---Checks if the value exists in the saver storage.
 ---@param key_id string The storage field name
 ---@return boolean is_exists true if the value exists, false otherwise
 function M.is_value_exists(key_id)
 	return M.get_game_state()[SAVER_KEY].storage[key_id] ~= nil
 end
+
+
+---A callback that is called before the saver saves the game state.
+---You can use it to perform additional actions before saving the game state.
+---For example to update your save data with values from the game.
+---		saver.before_save_callback = function()
+---			profile.update_save_data()
+---		end
+---@type function|nil
+M.before_save_callback = nil
 
 
 return M

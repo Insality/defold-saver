@@ -267,14 +267,14 @@ local function save_image(image_path, save_name)
     file:close()
 
     -- Save the binary data using the dedicated function
-    local success = saver.save_binary_by_path(image_data, save_name)
+    local success = saver.save_file_by_name(image_data, save_name, saver.FORMAT.BINARY)
     return success
 end
 
 -- Load a saved PNG image from the save directory
 local function load_image(save_name)
     -- Load the binary data
-    local image_data = saver.load_binary_by_path(save_name)
+    local image_data = saver.load_file_by_name(save_name, saver.FORMAT.BINARY)
     if not image_data then
         print("Failed to load saved image:", save_name)
         return nil

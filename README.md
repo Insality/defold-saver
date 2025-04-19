@@ -75,7 +75,7 @@ Defold Saver uses the following core concepts:
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
 - **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `binary` format instead. Read more in Use Cases section.
-- **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables) and Lua tables that contain Defold userdata. Use `saver.save_binary_data`/`saver.load_binary_data` for raw binary data and `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for Lua tables with userdata.
+- **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables) and Lua tables that contain Defold userdata. Use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
 
 
 ## Basic Usage
@@ -160,7 +160,8 @@ storage.delete(id)
 
 ### API Reference
 
-Read the [API Reference](API_REFERENCE.md) file to see the full API documentation for the module.
+- Saver API: [saver_api.md](api/saver_api.md)
+- Storage API: [storage_api.md](api/storage_api.md) (deprecated, use `saver.set_value` and `saver.get_value` instead)
 
 
 ## Use Cases
