@@ -240,7 +240,7 @@ end
 ---		saver.save_file_by_path(data, file_path)
 ---@param data table|string The save data table or string if the data is already encoded (or binary)
 ---@param path string The save file path
----@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from file extension or data type.
+---@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension or data type.
 ---@return boolean true if the file was saved successfully, false otherwise
 function M.save_file_by_path(data, path, format)
 	return saver_internal.save_file_by_path(data, path, format)
@@ -255,7 +255,7 @@ end
 ---		local data = saver.load_file_by_path(file_path)
 ---		pprint(data)
 ---@param path string The file path
----@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from file extension.
+---@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension.
 ---  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
 ---@return table|string|nil The loaded data, or nil if the file can't be loaded
 function M.load_file_by_path(path, format)
@@ -508,7 +508,7 @@ end
 ---@generic T
 ---@param key_id string The storage field name
 ---@param default_value T? The default value
----@return T
+---@return T value The value from the saver storage
 function M.get_value(key_id, default_value)
 	local value = M.get_game_state()[SAVER_KEY].storage[key_id]
 	if value == nil then
@@ -524,6 +524,14 @@ end
 ---@param value any value
 function M.set_value(key_id, value)
 	M.get_game_state()[SAVER_KEY].storage[key_id] = value
+end
+
+
+---Check if the value exists in the saver storage.
+---@param key_id string The storage field name
+---@return boolean is_exists true if the value exists, false otherwise
+function M.is_value_exists(key_id)
+	return M.get_game_state()[SAVER_KEY].storage[key_id] ~= nil
 end
 
 

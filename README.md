@@ -108,7 +108,7 @@ end
 ```lua
 local saver = require("saver.saver")
 
--- Main
+-- Main functions
 saver.init()
 saver.bind_save_state(table_key_id, table_reference)
 saver.save_game_state([save_name])
@@ -117,7 +117,7 @@ saver.set_game_state(game_state)
 saver.get_game_state()
 saver.delete_game_state([save_name])
 
--- File
+-- File Handling
 saver.save_file_by_path(data, absolute_file_path, [format])
 saver.load_file_by_path(absolute_file_path, [format])
 saver.delete_file_by_path(absolute_file_path)
@@ -129,11 +129,12 @@ saver.delete_file_by_name(file_name)
 saver.FORMAT.JSON -- "json", save and load as JSON
 saver.FORMAT.LUA -- "lua", save and load as Lua
 saver.FORMAT.SERIALIZED -- "serialized", save and load as Lua serialized table
-saver.FORMAT.BINARY -- "binary", save and load as binary
+saver.FORMAT.BINARY -- "binary", save and load binary data, not a Lua table
 
 -- Storage
 saver.set_value(key_id, value)
 saver.get_value(key_id, [default_value])
+saver.is_value_exists(key_id)
 
 -- Other
 saver.set_autosave_timer(seconds)
@@ -145,6 +146,7 @@ saver.set_logger(logger)
 saver.get_current_game_project_folder()
 saver.before_save_callback = function() "Called before saver saves data" end
 
+---@deprecated Use `saver.set_value` and `saver.get_value` instead
 local storage = require("saver.storage")
 storage.set(id, value)
 storage.get(id, [default_value])
@@ -204,10 +206,10 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 - Fix `saver.delete_file_by_path` for HTML5.
 
 ### **V4**
-- Improved binary data handling with explicit API for different file formats
-- Added dedicated functions for handling binary data and tables with Defold userdata
+- Add binary data handling with explicit API for different file formats
 - Better file format detection and improved internal implementation
 - More consistent API for saving and loading files
+- Deprecated `saver.storage` module, use `saver.set_value` and `saver.get_value` instead
 </details>
 
 
