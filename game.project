@@ -13,7 +13,7 @@ input_method = HiddenInputField
 
 [project]
 title = Defold Saver
-version = 2
+version = 4
 publisher = Insality
 developer = Maksim Tuprikov, Insality
 dependencies#0 = https://github.com/britzl/deftest/archive/master.zip
@@ -22,7 +22,7 @@ dependencies#0 = https://github.com/britzl/deftest/archive/master.zip
 include_dirs = saver
 
 [saver]
-save_name = game.json
+save_name = game
 save_folder = Defold Saver
 autosave_timer = 0
 saver_key = saver
