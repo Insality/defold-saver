@@ -88,7 +88,7 @@ end
 ---		-- Save the game with custom name
 ---		saver.save_game_state("custom_save")
 ---@param save_name string|nil The name of the file to save the game state to. Default is the file name specified in the game.project file under the saver.save_file key.
----@return boolean true if the game state was saved successfully, false otherwise.
+---@return boolean is_saved true if the game state was saved successfully, false otherwise.
 function M.save_game_state(save_name)
 	if M.before_save_callback then
 		M.before_save_callback()
@@ -121,7 +121,7 @@ end
 ---		-- Load the game state with custom name
 ---		local is_loaded = saver.load_game_state("custom_save")
 ---@param save_name string|nil The name of the file to load the game state from. Default is the file name specified in the game.project file.
----@return boolean True if the game state was loaded successfully, false if the new game state is created
+---@return boolean is_loaded true if the game state was loaded successfully, false if the new game state is created
 function M.load_game_state(save_name)
 	save_name = save_name or SAVE_NAME
 
@@ -161,7 +161,7 @@ end
 ---		-- Delete the game state with custom name
 ---		saver.delete_game_state("custom_save")
 ---@param save_name string|nil The name of the file to delete the game state from. Default is the file name specified in the game.project file.
----@return boolean true if the game state was deleted successfully, false otherwise.
+---@return boolean is_deleted true if the game state was deleted successfully, false otherwise.
 function M.delete_game_state(save_name)
 	save_name = save_name or SAVE_NAME
 
@@ -192,7 +192,7 @@ end
 ---		game_state.game.level = 5
 ---		saver.set_game_state(game_state)
 ---@param data table The state to set the game state to.
----@return boolean true if the game state was set successfully, false otherwise.
+---@return boolean is_set true if the game state was set successfully, false otherwise.
 function M.set_game_state(data)
 	assert(data, "Can't set nil game state")
 	saver_internal.GAME_STATE = data
@@ -250,7 +250,7 @@ end
 ---@param data table|string The lua table to save to the file.
 ---@param path string The absolute path to save the file to. Contains the file name and extension. Extension can be empty, .json or .lua
 ---@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension or data type.
----@return boolean true if the file was saved successfully, false otherwise.
+---@return boolean is_saved true if the file was saved successfully, false otherwise.
 function M.save_file_by_path(data, path, format)
 	return saver_internal.save_file_by_path(data, path, format)
 end
@@ -285,7 +285,7 @@ end
 
 ---Deletes the file at the specified path.
 ---@param path string The absolute path to the file to delete. Contains the file name and extension.
----@return boolean true if the file was deleted successfully, false otherwise.
+---@return boolean is_deleted true if the file was deleted successfully, false otherwise.
 function M.delete_file_by_path(path)
 	return saver_internal.delete_file_by_path(path)
 end
@@ -302,7 +302,7 @@ end
 ---@param data table|string The lua table to save to the file.
 ---@param filename string The name of the file to save the data to. Can contain subfolders.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
----@return boolean true if the file was saved successfully, false otherwise.
+---@return boolean is_saved true if the file was saved successfully, false otherwise.
 function M.save_file_by_name(data, filename, format)
 	if data == nil then
 		saver_internal.logger:error("Cannot save nil data", { filename = filename })
@@ -324,7 +324,7 @@ end
 ---@param filename string The name of the file to load the data from. Can contain subfolders.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
 ---  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
----@return table|string|nil The data loaded from the file. If the file does not exist, returns nil.
+---@return table|string|nil data The data loaded from the file. If the file does not exist, returns nil.
 function M.load_file_by_name(filename, format)
 	return M.load_file_by_path(M.get_save_path(filename), format)
 end
@@ -333,7 +333,7 @@ end
 ---Deletes the file with the specified name. The file is deleted from the game save folder. Filename supports subfolders.
 ---		saver.delete_file_by_name("data.json")
 ---@param filename string The name of the file to delete. Can contain subfolders.
----@return boolean true if the file was deleted successfully, false otherwise.
+---@return boolean is_deleted true if the file was deleted successfully, false otherwise.
 function M.delete_file_by_name(filename)
 	return M.delete_file_by_path(M.get_save_path(filename))
 end
@@ -346,7 +346,7 @@ end
 ---		local file_path_2 = saver.get_save_path("profiles/profile1.json")
 ---		print(file_path_2) -- "/Users/user/Library/Application Support/Defold Saver/profiles/profile1.json"
 ---@param filename string The name of the file to get the path for. Can contain subfolders.
----@return string The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
+---@return string path The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
 function M.get_save_path(filename)
 	assert(filename, "Can't get save path without filename")
 
@@ -365,7 +365,7 @@ end
 ---Returns the current save version of the game state. The save version is used to check if the game state is older than the current version. The save version increments when the game state is saved.
 ---		local save_version = saver.get_save_version()
 ---		print(save_version)
----@return number The current save version of the game state.
+---@return number version The current save version of the game state.
 function M.get_save_version()
 	return M.get_game_state()[SAVER_KEY].version
 end

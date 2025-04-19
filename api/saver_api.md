@@ -88,7 +88,7 @@ Save the current game state to a file. If no file name is provided, the default 
 	- `[save_name]` *(string|nil)*: The name of the file to save the game state to. Default is the file name specified in the game.project file under the saver.save_file key.
 
 - **Returns:**
-	- `true` *(boolean)*: if the game state was saved successfully, false otherwise.
+	- `is_saved` *(boolean)*: true if the game state was saved successfully, false otherwise.
 
 - **Example Usage:**
 
@@ -111,7 +111,7 @@ Load the game state from a file. If no file name is provided, the default file n
 	- `[save_name]` *(string|nil)*: The name of the file to load the game state from. Default is the file name specified in the game.project file.
 
 - **Returns:**
-	- `True` *(boolean)*: if the game state was loaded successfully, false if the new game state is created
+	- `is_loaded` *(boolean)*: true if the game state was loaded successfully, false if the new game state is created
 
 - **Example Usage:**
 
@@ -135,7 +135,7 @@ If autosave is enabled, it will be rescheduled, so probably you want to immediat
 	- `[save_name]` *(string|nil)*: The name of the file to delete the game state from. Default is the file name specified in the game.project file.
 
 - **Returns:**
-	- `true` *(boolean)*: if the game state was deleted successfully, false otherwise.
+	- `is_deleted` *(boolean)*: true if the game state was deleted successfully, false otherwise.
 
 - **Example Usage:**
 
@@ -176,7 +176,7 @@ Sets the current game state to the specified state.
 	- `data` *(table)*: The state to set the game state to.
 
 - **Returns:**
-	- `true` *(boolean)*: if the game state was set successfully, false otherwise.
+	- `is_set` *(boolean)*: true if the game state was set successfully, false otherwise.
 
 - **Example Usage:**
 
@@ -229,7 +229,7 @@ Saves the specified data to a file at the specified path. The data format is cho
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension or data type.
 
 - **Returns:**
-	- `true` *(boolean)*: if the file was saved successfully, false otherwise.
+	- `is_saved` *(boolean)*: true if the file was saved successfully, false otherwise.
 
 - **Example Usage:**
 
@@ -284,7 +284,7 @@ Deletes the file at the specified path.
 	- `path` *(string)*: The absolute path to the file to delete. Contains the file name and extension.
 
 - **Returns:**
-	- `true` *(boolean)*: if the file was deleted successfully, false otherwise.
+	- `is_deleted` *(boolean)*: true if the file was deleted successfully, false otherwise.
 
 ### save_file_by_name
 
@@ -301,7 +301,7 @@ Saves the specified data to a file with the specified name. The file is saved in
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary)
 
 - **Returns:**
-	- `true` *(boolean)*: if the file was saved successfully, false otherwise.
+	- `is_saved` *(boolean)*: true if the file was saved successfully, false otherwise.
 
 - **Example Usage:**
 
@@ -328,7 +328,7 @@ Loads the data from a file with the specified name. The file is loaded from the 
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary)
 
 - **Returns:**
-	- `The` *(string|table|nil)*: data loaded from the file. If the file does not exist, returns nil.
+	- `data` *(string|table|nil)*: The data loaded from the file. If the file does not exist, returns nil.
 
 - **Example Usage:**
 
@@ -349,7 +349,7 @@ Deletes the file with the specified name. The file is deleted from the game save
 	- `filename` *(string)*: The name of the file to delete. Can contain subfolders.
 
 - **Returns:**
-	- `true` *(boolean)*: if the file was deleted successfully, false otherwise.
+	- `is_deleted` *(boolean)*: true if the file was deleted successfully, false otherwise.
 
 - **Example Usage:**
 
@@ -369,7 +369,7 @@ Returns the absolute path to the game save folder. If a file name is provided, t
 	- `filename` *(string)*: The name of the file to get the path for. Can contain subfolders.
 
 - **Returns:**
-	- `The` *(string)*: absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
+	- `path` *(string)*: The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
 
 - **Example Usage:**
 
@@ -389,7 +389,7 @@ saver.get_save_version()
 Returns the current save version of the game state. The save version is used to check if the game state is older than the current version. The save version increments when the game state is saved.
 
 - **Returns:**
-	- `The` *(number)*: current save version of the game state.
+	- `version` *(number)*: The current save version of the game state.
 
 - **Example Usage:**
 
