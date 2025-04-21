@@ -19,6 +19,11 @@ local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage")
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 
+local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
+if INSTANCE_INDEX > 0 then
+	SAVE_NAME = SAVE_NAME .. "_" .. INSTANCE_INDEX
+end
+
 ---Persist data between game sessions
 ---@class saver.state
 ---@field storage table<string, any> Table with key-value data
