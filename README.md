@@ -8,7 +8,7 @@
 
 # Saver
 
-**Saver** - is a library for saving and loading save data in **Defold** projects. It provides a simple API for saving and loading save data, as well as support for migrations and simple key-value storage. The library supports saving and loading data in JSON, Lua, or binary format, and can save and load files to and from the file system.
+**Saver** - is a library for saving and loading save data in **Defold** projects. It provides a simple API for saving and loading save data, as well as support for migrations and simple key-value storage. The library supports saving and loading data in JSON, Lua or binary format, and can save and load files to and from the file system.
 
 ## Features
 
@@ -17,8 +17,8 @@
 - **Auto-Save**: Automatically save data at regular intervals.
 - **Migrations**: Apply migrations to data when the migration version changed.
 - **Storage**: Store key-value pairs in the save data.
-- **Format support**: Save and load data in JSON, Lua or binary format.
-- **Binary Data**: Save and load both Lua tables and raw binary data (like images) with dedicated API.
+- **Format support**: Save and load Lua tables in JSON, Lua or serialized format.
+- **Binary Data**: Save and load the raw binary data (like images) with dedicated API.
 
 ## Setup
 
@@ -54,7 +54,6 @@ save_name = game
 save_folder = Defold Saver
 autosave_timer = 3
 saver_key = saver
-storage_key = storage
 lua_require_as_string = 0
 ```
 
@@ -64,8 +63,7 @@ This configuration section for `game.project` defines various settings:
 - **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name (with only alphanumeric, underscores or spaces characters).
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
-- **storage_key**: The key in the save data table that contains the Storage state. Default is `storage`.
-- **lua_require_as_string**: If set to `1`, the `require()` function will load Lua files as strings instead of Lua tables. This is useful for loading external files and processing their paths. The default value is `0`. This setting only affects the Lua format and works for both save and load functions.
+- **lua_require_as_string**: If set to `1`, the `require()` function will load Lua files as strings instead of Lua tables. This is useful for loading external files and processing their paths. The default value is `0`. This setting only affects the Lua format and works for load function.
 
 ### Core Concepts
 
@@ -73,8 +71,8 @@ Defold Saver uses the following core concepts:
 - **Auto-Save**: Automatically save data at regular intervals. It used as a default save method. This allows you to specify the data you want to keep in the save file and the library will handle the rest.
 - **Save State**: A Save state contains a set of table references in the save file. You can bind multiple save states. Bindings is done by the `saver.bind_save_state(id, table_reference)` function. When you bind the table to save state and previous data was saved, the save data will override values in your reference table. So usually you should bind the default table from module or your game data on game loader step.
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
-- **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `storage.set` and `storage.get` functions.
-- **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `binary` format instead. Read more in Use Cases section.
+- **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `saver.set_value` and `saver.get_value` functions.
+- **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `serialized` format instead. Read more in Use Cases section.
 - **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables) and Lua tables that contain Defold userdata. Use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
 
 
@@ -207,9 +205,6 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 - Fix `saver.delete_file_by_path` for HTML5.
 
 ### **V4**
-- [Breaking] The default save name changed from `game.json` to `game`
-  - To keep the previous behavior, you should set the `save_name` in the `game.project` file.
-  - The serialized format are better due it can handle more complex data types, like userdata, sparse arrays, etc
 - Add binary data handling with explicit API for different file formats
   - Previously, this library was designed to save and load a Lua table to persistent storage. But sometimes you want to operate with binary data, like images, audio, etc. Now you can use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
 - Better file format detection and improved internal implementation
