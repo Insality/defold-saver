@@ -207,10 +207,15 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 - Fix `saver.delete_file_by_path` for HTML5.
 
 ### **V4**
+- [Breaking] The default save name changed from `game.json` to `game`
+  - To keep the previous behavior, you should set the `save_name` in the `game.project` file.
+  - The serialized format are better due it can handle more complex data types, like userdata, sparse arrays, etc
 - Add binary data handling with explicit API for different file formats
+  - Previously, this library was designed to save and load a Lua table to persistent storage. But sometimes you want to operate with binary data, like images, audio, etc. Now you can use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
 - Better file format detection and improved internal implementation
 - More consistent API for saving and loading files
-- Deprecated `saver.storage` module, use `saver.set_value` and `saver.get_value` instead
+- Deprecated `saver.storage` module
+  - Now you should use `saver.set_value` and `saver.get_value` for key-value storage
 </details>
 
 
