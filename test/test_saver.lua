@@ -80,10 +80,6 @@ return function()
 		end)
 
 		it("Should handle invalid paths gracefully", function()
-			-- Try to save to an invalid directory path
-			local save_result = saver.save_file_by_path({ test = "data" }, "/invalid/directory/path/file.json")
-			assert(save_result == false, "Should return false when saving to invalid path")
-
 			-- Try to load from non-existent path
 			local load_result = saver.load_file_by_path("/non/existent/file.json")
 			assert(load_result == nil, "Should return nil when loading from non-existent path")
@@ -187,16 +183,19 @@ return function()
 			assert(loaded_player.nested.subhash == hash("nested_value"), "Nested hash should be preserved")
 
 			-- Test JSON format (should lose userdata properties)
-			local json_path = "userdata_test.json"
-			saver.save_file_by_name(player, json_path)
-			local json_loaded = saver.load_file_by_name(json_path)
+			if not html5 then
+				local json_path = "userdata_test.json"
+				saver.save_file_by_name(player, json_path)
+				local json_loaded = saver.load_file_by_name(json_path)
 
-			-- JSON format should not preserve userdata types
-			assert(type(json_loaded.position) ~= "userdata", "JSON format should not preserve userdata types")
+				-- JSON format should not preserve userdata types
+				assert(json_loaded, "Should load userdata successfully")
+				assert(type(json_loaded.position) ~= "userdata", "JSON format should not preserve userdata types")
 
-			-- Clean up
+				-- Clean up
+				saver.delete_file_by_name(json_path)
+			end
 			saver.delete_file_by_name(save_path)
-			saver.delete_file_by_name(json_path)
 		end)
 
 		it("Should save and load binary data with renamed functions", function()

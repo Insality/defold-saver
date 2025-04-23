@@ -486,7 +486,7 @@ local GET_LOCAL_STORAGE = [[
 ---Load the data from the local storage in HTML5
 ---@param path string The path to the data in the local storage
 ---@param format string|nil If "binary", then the data will not be decoded from base64
----@return table|nil The loaded data
+---@return table|nil data The loaded data
 function M.load_html5(path, format)
 	local web_data = html5.run(string.format(GET_LOCAL_STORAGE, path))
 	if not web_data or web_data == "" then

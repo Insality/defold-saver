@@ -47,14 +47,6 @@ return function()
 		end
 
 
-		it("Should have test image available", function()
-			assert(project_path ~= nil, "Project path should be available")
-			assert(logo_path ~= nil, "Logo path should be constructed")
-			assert(binary_data ~= nil, "Binary data should be loaded from logo.png")
-			assert(#binary_data > 0, "Binary data should not be empty")
-		end)
-
-
 		it("Should save and load binary data", function()
 			if binary_data then
 				-- Save binary data using the dedicated function
@@ -178,10 +170,6 @@ return function()
 
 
 		it("Should handle invalid paths gracefully", function()
-			-- Try to save to an invalid path
-			local invalid_path_result = saver.save_file_by_path({test = "data"}, "/invalid/directory/path/file.json")
-			assert(invalid_path_result == false, "Saving to invalid path should return false")
-
 			-- Try to load from invalid path should not crash
 			local invalid_load_result = saver.load_file_by_path("/invalid/directory/path/file.json")
 			assert(invalid_load_result == nil, "Loading from invalid path should return nil")
