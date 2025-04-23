@@ -15,10 +15,10 @@
 - **Save and Load Game State**: Save and load Lua tables with a simple API.
 - **File Management**: Save and load data from filesystem or application data folder.
 - **Auto-Save**: Automatically save state at regular intervals.
-- **Migrations**: Apply migrations to game state when the migration version changed.
 - **Storage**: Store key-value pairs in the game state.
-- **Format support**: Save and load Lua tables in JSON, Lua or serialized format.
-- **Binary Data**: Save and load the raw binary data (like images) with dedicated API.
+- **Format support**: Save and load Lua tables in "json", "lua" or "serialized" format.
+- **Binary Data**: Save and load the raw binary data (like images) with "binary" format.
+- **Migrations**: Apply migrations to game state when the migration version changed.
 
 ## Setup
 
@@ -59,11 +59,11 @@ lua_require_as_string = 0
 
 This configuration section for `game.project` defines various settings:
 
-- **save_name**: The name of the save file. Default is `game`. The file will be stored in the `save_folder` folder. The file extension can be: `.json`, `.lua`, if not specified, the `sys.save` and `sys.load` function will be used to save the data in serialized format. Recommended to use serialized format (no file extension).
+- **save_name**: The name of the save file. Default is `game`. The file will be stored in the `save_folder` folder. Can have an extension like `.json`, `.lua` (but will not keep the userdata types like `vmath.vector3`, `hash` etc).
 - **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name (with only alphanumeric, underscores or spaces characters).
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
-- **lua_require_as_string**: If set to `1`, the `require()` function will load Lua files as strings instead of Lua tables. This is useful for loading external files and processing their paths. The default value is `0`. This setting only affects the Lua format and works for load function.
+- **lua_require_as_string**: If set to `1`, the `require()` function will load Lua files as strings instead of Lua tables. This is useful for loading external files and processing their paths. The default value is `0`. This setting only affects the Lua format and works for load function. Very special case!
 
 ### Core Concepts
 

@@ -120,11 +120,8 @@ end
 
 
 ---Load the game state from a file. If no file name is provided, the default file name specified in the game.project file is used.
----		-- Load the game state with default name
----		local is_loaded = saver.load_game_state()
----
----		-- Load the game state with custom name
----		local is_loaded = saver.load_game_state("custom_save")
+---		local is_loaded = saver.load_game_state() -- Load the game state with default name
+---		local is_loaded = saver.load_game_state("custom_save") -- Load the game state with custom name
 ---@param save_name string|nil The name of the file to load the game state from. Default is the file name specified in the game.project file.
 ---@return boolean is_loaded true if the game state was loaded successfully, false if the new game state is created
 function M.load_game_state(save_name)
@@ -302,12 +299,12 @@ end
 
 
 ---Checks if the file exists at the specified path.
+---		local is_project_file_exists = saver.is_file_exists_by_path(absolute_path_to_file)
 ---@param path string The absolute path to the file to check. Contains the file name and extension.
 ---@return boolean is_exists true if the file exists, false otherwise.
 function M.is_file_exists_by_path(path)
 	return saver_internal.is_file_exists_by_path(path)
 end
-
 
 
 ---Saves the specified data to a file with the specified name. The file is saved in the game save folder. Filename supports subfolders.
@@ -359,6 +356,7 @@ end
 
 
 ---Checks if the file exists with the specified name. The file is checked in the game save folder. Filename supports subfolders.
+--		local is_header_downloaded = saver.is_file_exists_by_name("/cache/header.png")
 ---@param filename string The name of the file to check. Can contain subfolders.
 ---@return boolean is_exists true if the file exists, false otherwise.
 function M.is_file_exists_by_name(filename)
