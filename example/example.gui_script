@@ -7,6 +7,7 @@ local state = {
 local function get_image(file_url, callback)
 	local encoded_url = defold_saver.encode_base64(file_url)
 	local image_data = saver.load_file_by_name("/files/" .. encoded_url, saver.FORMAT.BINARY)
+	print("image_data", image_data)
 	if not image_data then
 		gui.set_text(gui.get_node("text_image_status"), "Loading from internet...")
 		http.request(file_url, "GET", function(_, id, response)

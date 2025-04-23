@@ -273,6 +273,11 @@ end
 ---  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
 ---@return table|string|nil The data loaded from the file. If the file does not exist, returns nil.
 function M.load_file_by_path(path, format)
+	--- If the game is running in HTML5, then load the data from the local storage
+	if html5 then
+		return saver_internal.load_html5(path, format)
+	end
+
 	if format then
 		if format == M.FORMAT.JSON then
 			return saver_internal.load_json(path)

@@ -289,11 +289,6 @@ end
 ---@param filepath string The save file path in save directory
 ---@return table|string|nil result The loaded data, or nil if the file can't be loaded
 function M.load_file_by_path(filepath)
-	--- If the game is running in HTML5, then load the data from the local storage
-	if html5 then
-		return M.load_html5(filepath)
-	end
-
 	local format = M.detect_format(filepath)
 
 	if format == M.FORMAT.JSON then
@@ -490,16 +485,22 @@ local GET_LOCAL_STORAGE = [[
 
 ---Load the data from the local storage in HTML5
 ---@param path string The path to the data in the local storage
+---@param format string|nil If "binary", then the data will not be decoded from base64
 ---@return table|nil The loaded data
-function M.load_html5(path)
+function M.load_html5(path, format)
 	local web_data = html5.run(string.format(GET_LOCAL_STORAGE, path))
 	if not web_data or web_data == "" then
+		M.logger:debug("No data in local storage", path)
 		return nil
 	end
 
 	local decoded = defold_saver.decode_base64(web_data)
-	local is_ok, lua_data = pcall(sys.deserialize, decoded)
 
+	if format == M.FORMAT.BINARY then
+		return decoded
+	end
+
+	local is_ok, lua_data = pcall(sys.deserialize, decoded)
 	if not is_ok then
 		M.logger:error("Can't parse the data from local storage", lua_data)
 		return nil

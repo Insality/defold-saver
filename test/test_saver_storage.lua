@@ -2,7 +2,7 @@ return function()
 	-- Move storage functions to the saver module
 	-- Storage module is deprecated
 	describe("Defold Saver Storage", function()
-		local saver = {} ---@type saver
+		local saver ---@type saver
 
 		before(function()
 			saver = require("saver.saver")

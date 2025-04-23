@@ -137,6 +137,7 @@ saver.delete_file_by_path(absolute_file_path)
 saver.is_file_exists_by_path(absolute_file_path)
 
 -- File Handling by relative path in application data folder (from sys.get_save_path())
+-- Subfolders are supported
 saver.save_file_by_name(data, file_name, [format])
 saver.load_file_by_name(file_name, [format])
 saver.delete_file_by_name(file_name)
@@ -153,12 +154,14 @@ saver.set_value(key_id, value)
 saver.get_value(key_id, [default_value])
 saver.is_value_exists(key_id)
 
+-- Migrations
+saver.set_migrations(migration_list)
+saver.apply_migrations()
+
 -- Other
 saver.set_autosave_timer(seconds)
 saver.get_save_path(file_name)
 saver.get_save_version()
-saver.set_migrations(migration_list)
-saver.apply_migrations()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
 saver.before_save_callback = function() "Called before saver saves data" end

@@ -1,6 +1,6 @@
 return function()
 	describe("Defold Migrations", function()
-		local saver = {} --[[@as saver]]
+		local saver --[[@as saver]]
 
 		before(function()
 			saver = require("saver.saver")
