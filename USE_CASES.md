@@ -242,9 +242,14 @@ saver_internal.json_encode = json.sorted_encode
 
 ## The Saver and Defold userdata
 
-In case your data contains a Defold userdata, like `vmath.vector3`, `hash` etc, you should not use the `json` or `lua` file format, due the userdata will be lost. Use `binary` format instead.
+In case your data contains a Defold userdata, like `vmath.vector3`, `hash` etc, you should not use the `json` or `lua` file format, due the userdata will be lost. Use `serialized` format instead.
 
-Binary format can be selected by not specifying the format in `saver.save_name` game.project setting.
+Serialized format can be selected by not specifying the format (`.json` or `.lua` extension) in `saver.save_name` game.project setting. Example:
+
+```
+saver.save_name = "game"
+```
+
 
 ## Saving and Loading Raw Binary Data
 
@@ -254,50 +259,50 @@ You can use the Saver library to save and load raw binary data, such as images, 
 local saver = require("saver.saver")
 
 -- Save a PNG image to the save directory
-local function save_image(image_path, save_name)
-    -- Open the original image file
-    local file = io.open(image_path, "rb")
-    if not file then
-        print("Failed to open image file:", image_path)
-        return false
-    end
-
-    -- Read the binary data
-    local image_data = file:read("*all")
-    file:close()
-
-    -- Save the binary data using the dedicated function
-    local success = saver.save_file_by_name(image_data, save_name, saver.FORMAT.BINARY)
-    return success
+local function save_image(file_url, file_name)
+    -- Load image from url
+    local file_url = "https://raw.githubusercontent.com/Insality/defold-saver/refs/heads/main/media/logo.png"
+    http.request(file_url, "GET", function(_, id, response)
+        if response.status == 200 or response.status == 304 then
+            local image_data = response.response
+            local success = saver.save_file_by_name(image_data, file_name, saver.FORMAT.BINARY)
+            return success
+        end
+    end)
 end
 
 -- Load a saved PNG image from the save directory
-local function load_image(save_name)
+local function load_image(save_name, node_id)
     -- Load the binary data
     local image_data = saver.load_file_by_name(save_name, saver.FORMAT.BINARY)
+    local img = image.load(image_data)
     if not image_data then
         print("Failed to load saved image:", save_name)
         return nil
     end
 
-    -- Use the image data (in this example, we'll save it to a new file)
-    local output_path = "loaded_" .. save_name
-    local file = io.open(output_path, "wb")
-    if not file then
-        print("Failed to open output file:", output_path)
+    -- Create an image from the binary data
+    if not img then
+        print("Unable to load image data")
         return nil
     end
 
-    file:write(image_data)
-    file:close()
+    -- Create a texture ID based on the save name
+    local texture_id = save_name .. "_texture"
 
-    print("Successfully loaded and saved image to:", output_path)
-    return image_data
+    -- Create a new texture from the image and set it to the GUI node
+    if gui.new_texture(texture_id, img.width, img.height, img.type, img.buffer) then
+        gui.set_texture(node_id, texture_id)
+        return texture_id
+    else
+        print("Failed to create texture from image data")
+        return nil
+    end
 end
 
 -- Usage
 save_image("assets/my_image.png", "saved_image.png")
-load_image("saved_image.png")
+load_image("saved_image.png", gui.get_node("image_node"))
 ```
 
 ## Saving and Loading Lua Tables with Defold Userdata

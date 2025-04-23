@@ -323,6 +323,24 @@ function M.delete_file_by_path(filepath)
 end
 
 
+---Checks if the file exists at the specified path.
+---@param filepath string The absolute path to the file to check. Contains the file name and extension.
+---@return boolean is_exists true if the file exists, false otherwise
+function M.is_file_exists_by_path(filepath)
+	if html5 then
+		return M.load_html5(filepath) ~= nil
+	end
+
+	local file = io.open(filepath)
+	if not file then
+		return false
+	end
+
+	file:close()
+	return true
+end
+
+
 ---Save the data in save directory
 ---@param data table|string The save data table or binary data
 ---@param filepath string The save file path in save directory

@@ -16,7 +16,7 @@ local PROJECT_NAME = sys.get_config_string("project.title"):gsub("[^%w_ ]", "")
 local DIRECTORY_PATH = sys.get_config_string("saver.save_folder", PROJECT_NAME)
 local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
-local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage")
+local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 
 local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
@@ -57,7 +57,7 @@ M.FORMAT = {
 	JSON = "json",        -- Save/load as JSON files
 	LUA = "lua",          -- Save/load as Lua files
 	SERIALIZED = "serialized", -- For Lua tables (with userdata) saved using sys.save/sys.load
-	BINARY = "binary"     -- For raw binary data (images, files, etc)
+	BINARY = "binary"     -- For raw binary data (images, files, etc), using io.* functions
 }
 
 ---Customize the logging mechanism used by Defold Saver.
@@ -296,6 +296,15 @@ function M.delete_file_by_path(path)
 end
 
 
+---Checks if the file exists at the specified path.
+---@param path string The absolute path to the file to check. Contains the file name and extension.
+---@return boolean is_exists true if the file exists, false otherwise.
+function M.is_file_exists_by_path(path)
+	return saver_internal.is_file_exists_by_path(path)
+end
+
+
+
 ---Saves the specified data to a file with the specified name. The file is saved in the game save folder. Filename supports subfolders.
 ---		local data = {
 ---			score = 100,
@@ -341,6 +350,14 @@ end
 ---@return boolean is_deleted true if the file was deleted successfully, false otherwise.
 function M.delete_file_by_name(filename)
 	return M.delete_file_by_path(M.get_save_path(filename))
+end
+
+
+---Checks if the file exists with the specified name. The file is checked in the game save folder. Filename supports subfolders.
+---@param filename string The name of the file to check. Can contain subfolders.
+---@return boolean is_exists true if the file exists, false otherwise.
+function M.is_file_exists_by_name(filename)
+	return M.is_file_exists_by_path(M.get_save_path(filename))
 end
 
 

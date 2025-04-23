@@ -12,11 +12,11 @@
 
 ## Features
 
-- **Save and Load Game State**: Save and load data with a simple API.
-- **File Management**: Save and load data to and from files.
-- **Auto-Save**: Automatically save data at regular intervals.
-- **Migrations**: Apply migrations to data when the migration version changed.
-- **Storage**: Store key-value pairs in the save data.
+- **Save and Load Game State**: Save and load Lua tables with a simple API.
+- **File Management**: Save and load data from filesystem or application data folder.
+- **Auto-Save**: Automatically save state at regular intervals.
+- **Migrations**: Apply migrations to game state when the migration version changed.
+- **Storage**: Store key-value pairs in the game state.
 - **Format support**: Save and load Lua tables in JSON, Lua or serialized format.
 - **Binary Data**: Save and load the raw binary data (like images) with dedicated API.
 
@@ -59,7 +59,7 @@ lua_require_as_string = 0
 
 This configuration section for `game.project` defines various settings:
 
-- **save_name**: The name of the save file. Default is `game`. The file will be stored in the `save_folder` folder. The file extension can be: `.json`, `.lua`, if not specified, the `sys.save` and `sys.load` function will be used to save the data in binary format. Recommended to use binary format (no file extension).
+- **save_name**: The name of the save file. Default is `game`. The file will be stored in the `save_folder` folder. The file extension can be: `.json`, `.lua`, if not specified, the `sys.save` and `sys.load` function will be used to save the data in serialized format. Recommended to use serialized format (no file extension).
 - **save_folder**: The folder name where the save file will be stored. Default is your `project.title` name (with only alphanumeric, underscores or spaces characters).
 - **autosave_timer**: The time interval in seconds between auto-saves. Default is `3`.
 - **saver_key**: The key in the save data table that contains the Saver state. Default is `saver`.
@@ -74,9 +74,12 @@ Defold Saver uses the following core concepts:
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `saver.set_value` and `saver.get_value` functions.
 - **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `serialized` format instead. Read more in Use Cases section.
 - **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables) and Lua tables that contain Defold userdata. Use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
+- **HTML5 Support**: The library supports HTML5 platform and uses `sys.serialize` with `base64` encoding for saving all data instead all other formats.
 
 
 ## Basic Usage
+
+Bind your lua table to make it persistent:
 
 ```lua
 local saver = require("saver.saver")
@@ -98,6 +101,18 @@ function init(self)
 end
 ```
 
+Using the simple storage API:
+
+```lua
+local saver = require("saver.saver")
+
+function init(self)
+	local run_count = saver.get_value("run_count", 0)
+	run_count = run_count + 1
+	saver.set_value("run_count", run_count)
+end
+```
+
 
 ## API Reference
 
@@ -115,13 +130,17 @@ saver.set_game_state(game_state)
 saver.get_game_state()
 saver.delete_game_state([save_name])
 
--- File Handling
+-- File Handling by absolute path
 saver.save_file_by_path(data, absolute_file_path, [format])
 saver.load_file_by_path(absolute_file_path, [format])
 saver.delete_file_by_path(absolute_file_path)
+saver.is_file_exists_by_path(absolute_file_path)
+
+-- File Handling by relative path in application data folder (from sys.get_save_path())
 saver.save_file_by_name(data, file_name, [format])
 saver.load_file_by_name(file_name, [format])
 saver.delete_file_by_name(file_name)
+saver.is_file_exists_by_name(file_name)
 
 -- File format constants
 saver.FORMAT.JSON -- "json", save and load as JSON
@@ -151,9 +170,6 @@ storage.get(id, [default_value])
 storage.get_number(id, [default_value])
 storage.get_string(id, [default_value])
 storage.get_boolean(id, [default_value])
-storage.get_table(id, [default_value])
-storage.is_exists(id)
-storage.delete(id)
 ```
 
 ### API Reference
