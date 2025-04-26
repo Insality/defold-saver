@@ -38,5 +38,9 @@
 		"line_space_after_function_statement": "fixed(3)",
 		"indent_style": "tab",
 		"indent_size": "4"
-	}
+	},
+	"Lua.workspace.library": [
+		"~/Library/Application Support/Cursor/User/globalStorage/astronachos.defold",
+		"~/Library/Application Support/Cursor/User/workspaceStorage/477d2400ef513fbe747ec01c3bd0aeea/astronachos.defold"
+	]
 }

@@ -240,3 +240,178 @@ local saver_internal = require("saver.saver_internal")
 saver_internal.json_encode = json.sorted_encode
 ```
 
+## The Saver and Defold userdata
+
+In case your data contains a Defold userdata, like `vmath.vector3`, `hash` etc, you should not use the `json` or `lua` file format, due the userdata will be lost. Use `serialized` format instead.
+
+Serialized format can be selected by not specifying the format (`.json` or `.lua` extension) in `saver.save_name` game.project setting. Example:
+
+```
+saver.save_name = "game"
+```
+
+
+## Saving and Loading Raw Binary Data
+
+You can use the Saver library to save and load raw binary data, such as images, audio files, or any other binary file format:
+
+```lua
+local saver = require("saver.saver")
+
+-- Save a PNG image to the save directory
+local function save_image(file_url, file_name)
+    -- Load image from url
+    local file_url = "https://raw.githubusercontent.com/Insality/defold-saver/refs/heads/main/media/logo.png"
+    http.request(file_url, "GET", function(_, id, response)
+        if response.status == 200 or response.status == 304 then
+            local image_data = response.response
+            local success = saver.save_binary_by_name(image_data, file_name)
+            return success
+        end
+    end)
+end
+
+-- Load a saved PNG image from the save directory
+local function load_image(save_name, node_id)
+    -- Load the binary data
+    local image_data = saver.load_binary_by_name(save_name)
+    local img = image.load(image_data)
+    if not image_data then
+        print("Failed to load saved image:", save_name)
+        return nil
+    end
+
+    -- Create an image from the binary data
+    if not img then
+        print("Unable to load image data")
+        return nil
+    end
+
+    -- Create a texture ID based on the save name
+    local texture_id = save_name .. "_texture"
+
+    -- Create a new texture from the image and set it to the GUI node
+    if gui.new_texture(texture_id, img.width, img.height, img.type, img.buffer) then
+        gui.set_texture(node_id, texture_id)
+        return texture_id
+    else
+        print("Failed to create texture from image data")
+        return nil
+    end
+end
+
+-- Usage
+save_image("assets/my_image.png", "saved_image.png")
+load_image("saved_image.png", gui.get_node("image_node"))
+```
+
+## Saving and Loading Lua Tables with Defold Userdata
+
+When working with Lua tables that contain Defold userdata like `vmath.vector3`, `hash`, or other Defold-specific types, you need to use binary or serialized format to preserve these values:
+
+```lua
+local saver = require("saver.saver")
+
+-- Save player data including position (vector3) and object ID (hash)
+local function save_player_data(player)
+    local player_data = {
+        position = player.position,       -- vmath.vector3
+        rotation = player.rotation,       -- vmath.quat
+        id = player.id,                  -- hash
+        velocity = player.velocity,      -- vmath.vector3
+        game_objects = player.game_objects -- might contain go.* references
+    }
+
+    local success = saver.save_binary_by_name(player_data, "player_data")
+    return success
+end
+
+-- Load player data
+local function load_player_data()
+    local player_data = saver.load_binary_by_name("player_data")
+    if not player_data then
+        print("Failed to load player data")
+        return nil
+    end
+
+    -- Now you can safely use the Defold userdata
+    local position = player_data.position -- This is a valid vmath.vector3
+    local id = player_data.id            -- This is a valid hash
+
+    return player_data
+end
+
+-- Usage example
+local player = {
+    position = vmath.vector3(100, 200, 0),
+    rotation = vmath.quat_rotation_z(math.rad(45)),
+    id = hash("player"),
+    velocity = vmath.vector3(5, 0, 0),
+}
+
+save_player_data(player)
+local loaded_player = load_player_data()
+
+-- You can now use the loaded data with all userdata intact
+print("Player position:", loaded_player.position)
+```
+
+## Explicitly Selecting Format
+
+If you need more control over the format, you can explicitly specify it when saving or loading files:
+
+```lua
+local saver = require("saver.saver")
+
+-- Available formats
+local JSON_FORMAT = saver.FORMAT.JSON     -- For human-readable JSON files
+local LUA_FORMAT = saver.FORMAT.LUA       -- For Lua files (more flexible than JSON)
+local SERIALIZED_FORMAT = saver.FORMAT.SERIALIZED -- For Lua tables with userdata using sys.save/sys.load
+
+-- Save game settings in JSON format for human readability
+local settings = {
+    music_volume = 0.8,
+    sfx_volume = 1.0,
+    difficulty = "normal",
+    controls = {
+        up = "w",
+        down = "s",
+        left = "a",
+        right = "d"
+    }
+}
+
+-- Save as JSON for human-readability
+saver.save_file_by_name(settings, "settings.json", JSON_FORMAT)
+
+-- Save the same data in Lua format
+saver.save_file_by_name(settings, "settings.lua", LUA_FORMAT)
+
+-- Save the same data in binary format
+saver.save_binary_by_name(settings, "settings")
+
+-- Load from any format
+local json_settings = saver.load_file_by_name("settings.json", JSON_FORMAT)
+local lua_settings = saver.load_file_by_name("settings.lua", LUA_FORMAT)
+local binary_settings = saver.load_binary_by_name("settings")
+
+-- You can also let the library auto-detect the format based on file extension
+local auto_json_settings = saver.load_file_by_name("settings.json")
+local auto_lua_settings = saver.load_file_by_name("settings.lua")
+```
+
+## Download file by URL and save it inside project data
+
+You can use the `saver.save_file_by_name` to save binary data to the project folder, like images, audio files, etc.
+
+```lua
+local saver = require("saver.saver")
+
+local file_url = "https://raw.githubusercontent.com/Insality/defold-saver/refs/heads/main/media/logo.png"
+http.request(file_url, "GET", function(_, id, response)
+	if response.status == 200 then
+		saver.save_binary_by_name(response.response, "cache/logo.png")
+	end
+end)
+```
+

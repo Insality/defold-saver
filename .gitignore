@@ -9,3 +9,4 @@ deployer_build_stats.csv
 bob*.jar
 manifest.*.der
 deployer_version_settings.txt
+/.editor_settings

@@ -1,7 +1,7 @@
 return function()
 	describe("Defold Storage", function()
-		local saver = {} --[[@as saver]]
-		local storage = {} --[[@as storage]]
+		local saver ---@type saver
+		local storage ---@type saver.storage
 
 		before(function()
 			saver = require("saver.saver")

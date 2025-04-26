@@ -4,6 +4,50 @@ local state = {
 	value = 0
 }
 
+---@param file_url string
+---@param callback fun(image_data: string)
+local function get_image(file_url, callback)
+	local encoded_url = defold_saver.encode_base64(file_url)
+	local image_data = saver.load_binary_by_name("/files/" .. encoded_url)
+	if not image_data then
+		gui.set_text(gui.get_node("text_image_status"), "Loading from internet...")
+		http.request(file_url, "GET", function(_, id, response)
+			if response.status == 200 or response.status == 304 then
+				-- Save the image to the cache
+				saver.save_binary_by_name(response.response, "/files/" .. encoded_url)
+				callback(response.response)
+
+				gui.set_text(gui.get_node("text_image_status"), "Image loaded from internet")
+			end
+		end)
+	end
+
+	gui.set_text(gui.get_node("text_image_status"), "Image loaded from cache")
+	if image_data then
+		callback(image_data)
+	end
+end
+
+
+local function load_and_set_image(callback)
+	local file_url = "https://raw.githubusercontent.com/Insality/defold-saver/refs/heads/main/media/logo.png"
+	get_image(file_url, function(image_data)
+		local img = image_data and image.load(image_data)
+		if not img then
+			print("Unable to load image data")
+			return nil
+		end
+
+		-- Create a texture ID based on the save name
+		local texture_id = "test_image_texture"
+
+		-- Create a new texture from the image and set it to the GUI node
+		if gui.new_texture(texture_id, img.width, img.height, img.type, img.buffer, false) then
+			gui.set_texture(gui.get_node("image_load"), texture_id)
+		end
+	end)
+end
+
 function init(self)
 	-- Initialize the saver
 	saver.init()
@@ -17,4 +61,7 @@ function init(self)
 
 	-- Save manually or via autosave
 	saver.save_game_state()
+
+	-- Binary working example
+	load_and_set_image()
 end

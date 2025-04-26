@@ -7,6 +7,17 @@ local TYPE_STRING = "string"
 local TYPE_NUMBER = "number"
 local TYPE_BOOLEAN = "boolean"
 
+---Persist data between game sessions
+---@deprecated
+---@class saver.storage.state
+---@field storage table<string, saver.storage.value> The storage data
+
+---One of the values in the storage
+---@class saver.storage.value
+---@field s_value string|nil
+---@field i_value number|nil
+---@field b_value boolean|nil
+
 ---@class saver.storage
 local M = {}
 
