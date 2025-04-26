@@ -358,7 +358,7 @@ local saver = require("saver.saver")
 
 local file_url = "https://raw.githubusercontent.com/Insality/defold-saver/refs/heads/main/media/logo.png"
 http.request(file_url, "GET", function(_, id, response)
-	if response.status == 200 then
+	if response.status == 200 or response.status == 304 then
 		saver.save_binary_by_name(response.response, "cache/logo.png")
 	end
 end)
