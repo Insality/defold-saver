@@ -4,16 +4,17 @@ local state = {
 	value = 0
 }
 
+---@param file_url string
+---@param callback fun(image_data: string)
 local function get_image(file_url, callback)
 	local encoded_url = defold_saver.encode_base64(file_url)
-	local image_data = saver.load_file_by_name("/files/" .. encoded_url, saver.FORMAT.BINARY)
-	print("image_data", image_data)
+	local image_data = saver.load_binary_by_name("/files/" .. encoded_url)
 	if not image_data then
 		gui.set_text(gui.get_node("text_image_status"), "Loading from internet...")
 		http.request(file_url, "GET", function(_, id, response)
 			if response.status == 200 or response.status == 304 then
 				-- Save the image to the cache
-				saver.save_file_by_name(response.response, "/files/" .. encoded_url, saver.FORMAT.BINARY)
+				saver.save_binary_by_name(response.response, "/files/" .. encoded_url)
 				callback(response.response)
 
 				gui.set_text(gui.get_node("text_image_status"), "Image loaded from internet")
@@ -22,7 +23,9 @@ local function get_image(file_url, callback)
 	end
 
 	gui.set_text(gui.get_node("text_image_status"), "Image loaded from cache")
-	callback(image_data)
+	if image_data then
+		callback(image_data)
+	end
 end
 
 

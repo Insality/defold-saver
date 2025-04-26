@@ -50,11 +50,11 @@ return function()
 		it("Should save and load binary data", function()
 			if binary_data then
 				-- Save binary data using the dedicated function
-				local save_success = saver.save_file_by_path(binary_data, test_binary_save_path, saver.FORMAT.BINARY)
+				local save_success = saver.save_binary_by_path(binary_data, test_binary_save_path)
 				assert(save_success, "Binary data should be saved successfully")
 
 				-- Load binary data back
-				local loaded_data = saver.load_file_by_path(test_binary_save_path, saver.FORMAT.BINARY)
+				local loaded_data = saver.load_binary_by_path(test_binary_save_path)
 				assert(loaded_data ~= nil, "Binary data should be loaded successfully")
 				assert(#loaded_data == #binary_data, "Loaded binary data should have the same size as original")
 				assert(loaded_data == binary_data, "Loaded binary data should be identical to original")
@@ -65,11 +65,11 @@ return function()
 		it("Should save and load binary data with explicit format", function()
 			if binary_data then
 				-- Save binary data using explicit format
-				local save_success = saver.save_file_by_name(binary_data, test_binary_save_path, saver.FORMAT.BINARY)
+				local save_success = saver.save_binary_by_name(binary_data, test_binary_save_path)
 				assert(save_success, "Binary data should be saved successfully with explicit format")
 
 				-- Load binary data back
-				local loaded_data = saver.load_file_by_name(test_binary_save_path, saver.FORMAT.BINARY)
+				local loaded_data = saver.load_binary_by_name(test_binary_save_path)
 				assert(loaded_data ~= nil, "Binary data should be loaded successfully with explicit format")
 				assert(#loaded_data == #binary_data, "Loaded binary data should have the same size as original")
 				assert(loaded_data == binary_data, "Loaded binary data should be identical to original")
@@ -120,13 +120,13 @@ return function()
 		it("Should auto-detect format for saving but use explicit format for loading binary", function()
 			if binary_data then
 				-- Save binary data with auto-detection (should detect as BINARY)
-				local save_success = saver.save_file_by_name(binary_data, test_binary_save_path)
+				local save_success = saver.save_binary_by_name(binary_data, test_binary_save_path)
 				assert(save_success, "Binary data should be saved successfully with auto-detection")
 
 				-- Load binary data back - we must specify BINARY format for binary data
 				-- Auto-detection can cause issues with binary data like PNG files
-				local loaded_data = saver.load_file_by_name(test_binary_save_path, saver.FORMAT.BINARY)
-				assert(loaded_data ~= nil, "Binary data should be loaded successfully")
+				local loaded_data = saver.load_binary_by_name(test_binary_save_path)
+				assert(loaded_data, "Binary data should be loaded successfully")
 				assert(#loaded_data == #binary_data, "Loaded binary data should have the same size as original")
 				assert(loaded_data == binary_data, "Loaded binary data should be identical to original")
 			end
@@ -135,17 +135,17 @@ return function()
 
 		it("Should handle errors gracefully", function()
 			-- Test loading non-existent files
-			local non_existent_data = saver.load_file_by_path("non_existent_file.png", saver.FORMAT.BINARY)
+			local non_existent_data = saver.load_binary_by_path("non_existent_file.png")
 			assert(non_existent_data == nil, "Non-existent binary file should return nil")
 
-			local non_existent_table = saver.load_file_by_name("non_existent_file.bin", saver.FORMAT.SERIALIZED)
+			local non_existent_table = saver.load_file_by_name("non_existent_file.bin")
 			assert(non_existent_table == nil, "Non-existent serialized table file should return nil")
 
 			-- Test with corrupted file path
 			if project_path then
 				-- Try to load a text file as binary (should fail gracefully)
 				local test_file_path = project_path .. "/test/files/corrupted.json"
-				local corrupted_data = saver.load_file_by_path(test_file_path, saver.FORMAT.BINARY)
+				local corrupted_data = saver.load_binary_by_path(test_file_path)
 				-- We don't assert nil here because it might load as binary string, which is fine
 				-- The important part is that it doesn't crash
 			end
@@ -158,12 +158,12 @@ return function()
 			local test_table_path = register_test_file("test_table.bin")
 
 			-- Save as serialized format
-			local save_success = saver.save_file_by_name(test_table, test_table_path, saver.FORMAT.SERIALIZED)
+			local save_success = saver.save_file_by_name(test_table, test_table_path)
 			assert(save_success, "Table should be saved successfully")
 
 			-- Try to load with wrong format (as binary)
 			-- Should not crash but may return data that can't be used as a table
-			local loaded_data = saver.load_file_by_name(test_table_path, saver.FORMAT.BINARY)
+			local loaded_data = saver.load_binary_by_name(test_table_path)
 
 			-- Not asserting specific result, just making sure it doesn't crash
 		end)

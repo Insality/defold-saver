@@ -4,7 +4,6 @@
 --- Use saver.bind_save_state("save_part_name", save_part_table) to load save part to save
 --- Use saver.save_game_state() to save the game
 --- You can set the game state a name to save it as different save
---- Use "saver.storage" to store key-value data in the persistent storage. Useful for various settings and misc data
 --- Use "saver.migrations" to apply migrations to the save
 
 local storage = require("saver.storage")
@@ -16,9 +15,10 @@ local PROJECT_NAME = sys.get_config_string("project.title"):gsub("[^%w_ ]", "")
 local DIRECTORY_PATH = sys.get_config_string("saver.save_folder", PROJECT_NAME)
 local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
-local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
+local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
 
+-- If several instances of the game are running, then we using instance index to avoid conflicts
 local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
 if INSTANCE_INDEX > 0 then
 	SAVE_NAME = SAVE_NAME .. "_" .. INSTANCE_INDEX
@@ -57,7 +57,6 @@ M.FORMAT = {
 	JSON = "json",        -- Save/load as JSON files
 	LUA = "lua",          -- Save/load as Lua files
 	SERIALIZED = "serialized", -- For Lua tables (with userdata) saved using sys.save/sys.load
-	BINARY = "binary"     -- For raw binary data (images, files, etc), using io.* functions
 }
 
 ---Customize the logging mechanism used by Defold Saver.
@@ -128,9 +127,7 @@ function M.load_game_state(save_name)
 	save_name = save_name or SAVE_NAME
 
 	-- Load file
-	local path = M.get_save_path(save_name)
-	local game_state = M.load_file_by_path(path)
-	---@cast game_state table
+	local game_state = M.load_file_by_name(save_name)
 	local is_loaded = game_state ~= nil
 
 	M.set_game_state(game_state or {})
@@ -146,9 +143,9 @@ function M.load_game_state(save_name)
 	M.bind_save_state(STORAGE_KEY, storage.state)
 
 	if is_loaded then
-		saver_internal.logger:info("Load game state", { save_name = save_name, path = path })
+		saver_internal.logger:info("Load game state", { save_name = save_name, path = M.get_save_path(save_name) })
 	else
-		saver_internal.logger:info("New game state created", { save_name = save_name, path = path })
+		saver_internal.logger:info("New game state created", { save_name = save_name, path = M.get_save_path(save_name) })
 	end
 
 	return is_loaded
@@ -249,12 +246,25 @@ end
 ---		-- Use path to the resources folder
 ---		local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 ---		saver.save_file_by_path(data, file_path)
----@param data table|string The lua table to save to the file.
+---@param data table The lua table to save to the file.
 ---@param path string The absolute path to save the file to. Contains the file name and extension. Extension can be empty, .json or .lua
 ---@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension or data type.
 ---@return boolean is_saved true if the file was saved successfully, false otherwise.
 function M.save_file_by_path(data, path, format)
 	return saver_internal.save_file_by_path(data, path, format)
+end
+
+
+---Saves the specified data to a file at the specified path. The data format is binary.
+---@param data string The binary data to save to the file.
+---@param path string The absolute path to save the file to. Contains the file name and extension.
+---@return boolean is_saved true if the file was saved successfully, false otherwise.
+function M.save_binary_by_path(data, path)
+	if html5 then
+		return saver_internal.save_html5(data, path)
+	end
+
+	return saver_internal.save_binary(data, path)
 end
 
 
@@ -266,13 +276,13 @@ end
 ---		local data = saver.load_file_by_path(file_path)
 ---		pprint(data)
 ---@param path string The absolute path to load the file from. Contains the file name and extension.
----@param format string|nil Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension.
----  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
----@return table|string|nil The data loaded from the file. If the file does not exist, returns nil.
+---@param format string|nil Optional format override (json, lua, serialized). If not specified, format will be detected from paths extension.
+---  NOTE: For binary data like images, use `saver.load_binary_by_path` instead.
+---@return table|nil data The data loaded from the file. If the file does not exist, returns nil.
 function M.load_file_by_path(path, format)
 	--- If the game is running in HTML5, then load the data from the local storage
 	if html5 then
-		return saver_internal.load_html5(path, format)
+		return saver_internal.load_html5(path, false)
 	end
 
 	if format then
@@ -282,11 +292,21 @@ function M.load_file_by_path(path, format)
 			return saver_internal.load_lua(path)
 		elseif format == M.FORMAT.SERIALIZED then
 			return saver_internal.load_serialized(path)
-		elseif format == M.FORMAT.BINARY then
-			return saver_internal.load_binary(path)
 		end
 	end
 	return saver_internal.load_file_by_path(path)
+end
+
+
+---Loads the binary data from a file at the specified path.
+---@param path string The absolute path to the file to load. Contains the file name and extension.
+---@return string|nil data The binary data loaded from the file. If the file does not exist, returns nil.
+function M.load_binary_by_path(path)
+	if html5 then
+		return saver_internal.load_html5(path, true) --[[@as string|nil]]
+	end
+
+	return saver_internal.load_binary(path)
 end
 
 
@@ -315,7 +335,7 @@ end
 ---
 ---		-- Save the data to the game save folder
 ---		saver.save_file_by_name(data, "data.json")
----@param data table|string The lua table to save to the file.
+---@param data table The lua table to save to the file.
 ---@param filename string The name of the file to save the data to. Can contain subfolders.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
 ---@return boolean is_saved true if the file was saved successfully, false otherwise.
@@ -334,15 +354,32 @@ function M.save_file_by_name(data, filename, format)
 end
 
 
+---Saves the specified data to a file with the specified name. The data format is binary.
+---@param data string The binary data to save to the file.
+---@param filename string The name of the file to save the data to. Can contain subfolders.
+---@return boolean is_saved true if the file was saved successfully, false otherwise.
+function M.save_binary_by_name(data, filename)
+	return M.save_binary_by_path(data, M.get_save_path(filename))
+end
+
+
 ---Loads the data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
 ---		local data = saver.load_file_by_name("data.json")
 ---		pprint(data)
 ---@param filename string The name of the file to load the data from. Can contain subfolders.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
----  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
----@return table|string|nil data The data loaded from the file. If the file does not exist, returns nil.
+---  NOTE: For binary data like images, use saver.load_binary_by_name instead.
+---@return table|nil data The data loaded from the file. If the file does not exist, returns nil.
 function M.load_file_by_name(filename, format)
 	return M.load_file_by_path(M.get_save_path(filename), format)
+end
+
+
+---Loads the binary data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
+---@param filename string The name of the file to load the binary data from. Can contain subfolders.
+---@return string|nil data The binary data loaded from the file. If the file does not exist, returns nil.
+function M.load_binary_by_name(filename)
+	return M.load_binary_by_path(M.get_save_path(filename))
 end
 
 
@@ -495,6 +532,7 @@ end
 ---Migrations are used to update the game state in case of changes to the game state structure.
 ---Migrations are applied in order. Each migration should be a function that takes the game state as a parameter and returns the updated game state.
 ---		local migrations = {
+---			-- Migration 1
 ---			function(game_state, logger)
 ---				-- Assume we have new level_data field in the game state and we need to move level and score to it
 ---				game_state.game.level_data = {
@@ -505,6 +543,7 @@ end
 ---				game_state.game.score = nil
 ---				return game_state
 ---			},
+---			-- Migration 2
 ---			function(game_state, logger)
 ---				-- Just an example, multiply the score by 1000. For example we changed our score system
 ---				game_state.game.level_data.score = game_state.game.level_data.score * 1000

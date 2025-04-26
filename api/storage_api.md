@@ -9,7 +9,6 @@
 - [get_number](#get_number)
 - [get_string](#get_string)
 - [get_boolean](#get_boolean)
-- [get_table](#get_table)
 - [set](#set)
 
 ## Fields
@@ -36,10 +35,10 @@ Get the value from the storage.
 
 - **Parameters:**
 	- `name` *(string)*: The storage field name
-	- `[default_value]` *(boolean|string|number|table|nil)*: The default value
+	- `[default_value]` *(boolean|string|number|nil)*: The default value
 
 - **Returns:**
-	- `` *(boolean|string|number|table|nil)*:
+	- `` *(boolean|string|number|nil)*:
 
 ### get_number
 
@@ -89,22 +88,6 @@ Get the boolean from the storage.
 - **Returns:**
 	- `` *(boolean)*:
 
-### get_table
-
----
-```lua
-storage.get_table(name, [default_value])
-```
-
-Get the table from the storage.
-
-- **Parameters:**
-	- `name` *(string)*: The storage field name
-	- `[default_value]` *(table|nil)*: The default value. If not set, then it will be an empty table.
-
-- **Returns:**
-	- `` *(table)*:
-
 ### set
 
 ---
@@ -116,7 +99,7 @@ Set the value to storage
 
 - **Parameters:**
 	- `id` *(string)*: The record id
-	- `value` *(boolean|string|number|table)*: value
+	- `value` *(boolean|string|number)*: value
 
 - **Returns:**
 	- `` *(boolean)*: true if the value was set, nil otherwise

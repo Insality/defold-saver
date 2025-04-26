@@ -265,7 +265,7 @@ local function save_image(file_url, file_name)
     http.request(file_url, "GET", function(_, id, response)
         if response.status == 200 or response.status == 304 then
             local image_data = response.response
-            local success = saver.save_file_by_name(image_data, file_name, saver.FORMAT.BINARY)
+            local success = saver.save_binary_by_name(image_data, file_name)
             return success
         end
     end)
@@ -274,7 +274,7 @@ end
 -- Load a saved PNG image from the save directory
 local function load_image(save_name, node_id)
     -- Load the binary data
-    local image_data = saver.load_file_by_name(save_name, saver.FORMAT.BINARY)
+    local image_data = saver.load_binary_by_name(save_name)
     local img = image.load(image_data)
     if not image_data then
         print("Failed to load saved image:", save_name)
@@ -322,15 +322,13 @@ local function save_player_data(player)
         game_objects = player.game_objects -- might contain go.* references
     }
 
-    -- Use BINARY format to preserve Defold userdata
-    local success = saver.save_file_by_name(player_data, "player_data", saver.FORMAT.BINARY)
+    local success = saver.save_binary_by_name(player_data, "player_data")
     return success
 end
 
 -- Load player data
 local function load_player_data()
-    -- Use BINARY format to correctly load Defold userdata
-    local player_data = saver.load_file_by_name("player_data", saver.FORMAT.BINARY)
+    local player_data = saver.load_binary_by_name("player_data")
     if not player_data then
         print("Failed to load player data")
         return nil
@@ -368,7 +366,6 @@ local saver = require("saver.saver")
 -- Available formats
 local JSON_FORMAT = saver.FORMAT.JSON     -- For human-readable JSON files
 local LUA_FORMAT = saver.FORMAT.LUA       -- For Lua files (more flexible than JSON)
-local BINARY_FORMAT = saver.FORMAT.BINARY -- For binary data like images, audio files, etc.
 local SERIALIZED_FORMAT = saver.FORMAT.SERIALIZED -- For Lua tables with userdata using sys.save/sys.load
 
 -- Save game settings in JSON format for human readability
@@ -391,12 +388,12 @@ saver.save_file_by_name(settings, "settings.json", JSON_FORMAT)
 saver.save_file_by_name(settings, "settings.lua", LUA_FORMAT)
 
 -- Save the same data in binary format
-saver.save_file_by_name(settings, "settings", BINARY_FORMAT)
+saver.save_binary_by_name(settings, "settings")
 
 -- Load from any format
 local json_settings = saver.load_file_by_name("settings.json", JSON_FORMAT)
 local lua_settings = saver.load_file_by_name("settings.lua", LUA_FORMAT)
-local binary_settings = saver.load_file_by_name("settings", BINARY_FORMAT)
+local binary_settings = saver.load_binary_by_name("settings")
 
 -- You can also let the library auto-detect the format based on file extension
 local auto_json_settings = saver.load_file_by_name("settings.json")
@@ -413,7 +410,7 @@ local saver = require("saver.saver")
 local file_url = "https://raw.githubusercontent.com/Insality/defold-saver/refs/heads/main/media/logo.png"
 http.request(file_url, "GET", function(_, id, response)
 	if response.status == 200 then
-		saver.save_file_by_name(response.response, "cache/logo.png", saver.FORMAT.BINARY)
+		saver.save_binary_by_name(response.response, "cache/logo.png")
 	end
 end)
 ```

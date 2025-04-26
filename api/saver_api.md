@@ -13,11 +13,17 @@
 - [set_game_state](#set_game_state)
 - [bind_save_state](#bind_save_state)
 - [save_file_by_path](#save_file_by_path)
+- [save_binary_by_path](#save_binary_by_path)
 - [load_file_by_path](#load_file_by_path)
+- [load_binary_by_path](#load_binary_by_path)
 - [delete_file_by_path](#delete_file_by_path)
+- [is_file_exists_by_path](#is_file_exists_by_path)
 - [save_file_by_name](#save_file_by_name)
+- [save_binary_by_name](#save_binary_by_name)
 - [load_file_by_name](#load_file_by_name)
+- [load_binary_by_name](#load_binary_by_name)
 - [delete_file_by_name](#delete_file_by_name)
+- [is_file_exists_by_name](#is_file_exists_by_name)
 - [get_save_path](#get_save_path)
 - [get_save_version](#get_save_version)
 - [set_autosave_timer](#set_autosave_timer)
@@ -116,10 +122,8 @@ Load the game state from a file. If no file name is provided, the default file n
 - **Example Usage:**
 
 ```lua
--- Load the game state with default name
-local is_loaded = saver.load_game_state()
--- Load the game state with custom name
-local is_loaded = saver.load_game_state("custom_save")
+local is_loaded = saver.load_game_state() -- Load the game state with default name
+local is_loaded = saver.load_game_state("custom_save") -- Load the game state with custom name
 ```
 ### delete_game_state
 
@@ -224,7 +228,7 @@ saver.save_file_by_path(data, path, [format])
 Saves the specified data to a file at the specified path. The data format is chosen by file path extension.
 
 - **Parameters:**
-	- `data` *(string|table)*: The lua table to save to the file.
+	- `data` *(table)*: The lua table to save to the file.
 	- `path` *(string)*: The absolute path to save the file to. Contains the file name and extension. Extension can be empty, .json or .lua
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension or data type.
 
@@ -244,6 +248,22 @@ local project_path = saver.get_current_game_project_folder()
 local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 saver.save_file_by_path(data, file_path)
 ```
+### save_binary_by_path
+
+---
+```lua
+saver.save_binary_by_path(data, path)
+```
+
+Saves the specified data to a file at the specified path. The data format is binary.
+
+- **Parameters:**
+	- `data` *(string)*: The binary data to save to the file.
+	- `path` *(string)*: The absolute path to save the file to. Contains the file name and extension.
+
+- **Returns:**
+	- `is_saved` *(boolean)*: true if the file was saved successfully, false otherwise.
+
 ### load_file_by_path
 
 ---
@@ -252,14 +272,14 @@ saver.load_file_by_path(path, [format])
 ```
 
 Loads the data from a file at the specified path.
-  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
+  NOTE: For binary data like images, use `saver.load_binary_by_path` instead.
 
 - **Parameters:**
 	- `path` *(string)*: The absolute path to load the file from. Contains the file name and extension.
-	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary). If not specified, format will be detected from paths extension.
+	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized). If not specified, format will be detected from paths extension.
 
 - **Returns:**
-	- `The` *(string|table|nil)*: data loaded from the file. If the file does not exist, returns nil.
+	- `data` *(table|nil)*: The data loaded from the file. If the file does not exist, returns nil.
 
 - **Example Usage:**
 
@@ -271,6 +291,21 @@ local file_path = saver.get_save_path(project_path .. "/resources/data.json")
 local data = saver.load_file_by_path(file_path)
 pprint(data)
 ```
+### load_binary_by_path
+
+---
+```lua
+saver.load_binary_by_path(path)
+```
+
+Loads the binary data from a file at the specified path.
+
+- **Parameters:**
+	- `path` *(string)*: The absolute path to the file to load. Contains the file name and extension.
+
+- **Returns:**
+	- `data` *(string|nil)*: The binary data loaded from the file. If the file does not exist, returns nil.
+
 ### delete_file_by_path
 
 ---
@@ -286,6 +321,26 @@ Deletes the file at the specified path.
 - **Returns:**
 	- `is_deleted` *(boolean)*: true if the file was deleted successfully, false otherwise.
 
+### is_file_exists_by_path
+
+---
+```lua
+saver.is_file_exists_by_path(path)
+```
+
+Checks if the file exists at the specified path.
+
+- **Parameters:**
+	- `path` *(string)*: The absolute path to the file to check. Contains the file name and extension.
+
+- **Returns:**
+	- `is_exists` *(boolean)*: true if the file exists, false otherwise.
+
+- **Example Usage:**
+
+```lua
+local is_project_file_exists = saver.is_file_exists_by_path(absolute_path_to_file)
+```
 ### save_file_by_name
 
 ---
@@ -296,7 +351,7 @@ saver.save_file_by_name(data, filename, [format])
 Saves the specified data to a file with the specified name. The file is saved in the game save folder. Filename supports subfolders.
 
 - **Parameters:**
-	- `data` *(string|table)*: The lua table to save to the file.
+	- `data` *(table)*: The lua table to save to the file.
 	- `filename` *(string)*: The name of the file to save the data to. Can contain subfolders.
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary)
 
@@ -313,6 +368,22 @@ local data = {
 -- Save the data to the game save folder
 saver.save_file_by_name(data, "data.json")
 ```
+### save_binary_by_name
+
+---
+```lua
+saver.save_binary_by_name(data, filename)
+```
+
+Saves the specified data to a file with the specified name. The data format is binary.
+
+- **Parameters:**
+	- `data` *(string)*: The binary data to save to the file.
+	- `filename` *(string)*: The name of the file to save the data to. Can contain subfolders.
+
+- **Returns:**
+	- `is_saved` *(boolean)*: true if the file was saved successfully, false otherwise.
+
 ### load_file_by_name
 
 ---
@@ -321,6 +392,7 @@ saver.load_file_by_name(filename, [format])
 ```
 
 Loads the data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
+---
   NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
 
 - **Parameters:**
@@ -328,7 +400,7 @@ Loads the data from a file with the specified name. The file is loaded from the 
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary)
 
 - **Returns:**
-	- `data` *(string|table|nil)*: The data loaded from the file. If the file does not exist, returns nil.
+	- `data` *(table|nil)*: The data loaded from the file. If the file does not exist, returns nil.
 
 - **Example Usage:**
 
@@ -336,6 +408,21 @@ Loads the data from a file with the specified name. The file is loaded from the 
 local data = saver.load_file_by_name("data.json")
 pprint(data)
 ```
+### load_binary_by_name
+
+---
+```lua
+saver.load_binary_by_name(filename)
+```
+
+Loads the binary data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
+
+- **Parameters:**
+	- `filename` *(string)*: The name of the file to load the binary data from. Can contain subfolders.
+
+- **Returns:**
+	- `data` *(string|nil)*: The binary data loaded from the file. If the file does not exist, returns nil.
+
 ### delete_file_by_name
 
 ---
@@ -355,6 +442,26 @@ Deletes the file with the specified name. The file is deleted from the game save
 
 ```lua
 saver.delete_file_by_name("data.json")
+```
+### is_file_exists_by_name
+
+---
+```lua
+saver.is_file_exists_by_name(filename)
+```
+
+Checks if the file exists with the specified name. The file is checked in the game save folder. Filename supports subfolders.
+
+- **Parameters:**
+	- `filename` *(string)*: The name of the file to check. Can contain subfolders.
+
+- **Returns:**
+	- `is_exists` *(boolean)*: true if the file exists, false otherwise.
+
+- **Example Usage:**
+
+```lua
+local is_header_downloaded = saver.is_file_exists_by_name("/cache/header.png")
 ```
 ### get_save_path
 
@@ -453,6 +560,7 @@ Migrations are applied in order. Each migration should be a function that takes 
 
 ```lua
 local migrations = {
+	-- Migration 1
 	function(game_state, logger)
 		-- Assume we have new level_data field in the game state and we need to move level and score to it
 		game_state.game.level_data = {
@@ -463,6 +571,7 @@ local migrations = {
 		game_state.game.score = nil
 		return game_state
 	},
+	-- Migration 2
 	function(game_state, logger)
 		-- Just an example, multiply the score by 1000. For example we changed our score system
 		game_state.game.level_data.score = game_state.game.level_data.score * 1000

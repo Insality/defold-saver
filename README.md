@@ -17,7 +17,7 @@
 - **Auto-Save**: Automatically save state at regular intervals.
 - **Storage**: Store key-value pairs in the game state.
 - **Format support**: Save and load Lua tables in "json", "lua" or "serialized" format.
-- **Binary Data**: Save and load the raw binary data (like images) with "binary" format.
+- **Binary Data**: Save and load the raw binary data (like images) with dedicated functions.
 - **Migrations**: Apply migrations to game state when the migration version changed.
 
 ## Setup
@@ -73,7 +73,7 @@ Defold Saver uses the following core concepts:
 - **Migration**: Migrations are used to update the save data if required. Migration is a just list of functions that will be applied to the save data if the migration version in save is less than the migrations count. You can set migrations by `saver.set_migrations` function before `saver.init` and apply them by `saver.apply_migrations` function after.
 - **Storage**: Storage is a simple key-value storage that can be utilized in many ways and you don't want to make a separate save state for it. You can set and get values by `saver.set_value` and `saver.get_value` functions.
 - **Saving Userdata**: Take a note, if your data contains Defold userdata, like `vmath.vector3`, `hash` etc, you should don't use the `json` file format, due the userdata will be lost. Use `lua` or `serialized` format instead. Read more in Use Cases section.
-- **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables) and Lua tables that contain Defold userdata. Use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
+- **Binary Data Handling**: The library provides dedicated functions for handling binary data (like images or other non-Lua tables). Use `saver.save_binary_by_name`/`saver.load_binary_by_name` and `saver.save_binary_by_path`/`saver.load_binary_by_path` for raw binary data.
 - **HTML5 Support**: The library supports HTML5 platform and uses `sys.serialize` with `base64` encoding for saving all data instead all other formats.
 
 
@@ -133,6 +133,8 @@ saver.delete_game_state([save_name])
 -- File Handling by absolute path
 saver.save_file_by_path(data, absolute_file_path, [format])
 saver.load_file_by_path(absolute_file_path, [format])
+saver.save_binary_by_path(data, absolute_file_path)
+saver.load_binary_by_path(absolute_file_path)
 saver.delete_file_by_path(absolute_file_path)
 saver.is_file_exists_by_path(absolute_file_path)
 
@@ -140,14 +142,15 @@ saver.is_file_exists_by_path(absolute_file_path)
 -- Subfolders are supported
 saver.save_file_by_name(data, file_name, [format])
 saver.load_file_by_name(file_name, [format])
+saver.save_binary_by_name(data, file_name)
+saver.load_binary_by_name(file_name)
 saver.delete_file_by_name(file_name)
 saver.is_file_exists_by_name(file_name)
 
 -- File format constants
-saver.FORMAT.JSON -- "json", save and load as JSON
-saver.FORMAT.LUA -- "lua", save and load as Lua
-saver.FORMAT.SERIALIZED -- "serialized", save and load as Lua serialized table
-saver.FORMAT.BINARY -- "binary", save and load binary data, not a Lua table
+saver.FORMAT.SERIALIZED -- "serialized", save and load as Lua serialized table. Default format.
+saver.FORMAT.JSON -- "json", save and load as JSON. Autoselect if path ends with .json
+saver.FORMAT.LUA -- "lua", save and load as Lua. Autoselect if path ends with .lua
 
 -- Storage
 saver.set_value(key_id, value)
@@ -225,7 +228,7 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 
 ### **V4**
 - Add binary data handling with explicit API for different file formats
-  - Previously, this library was designed to save and load a Lua table to persistent storage. But sometimes you want to operate with binary data, like images, audio, etc. Now you can use `saver.save_file_by_name`/`saver.load_file_by_name` with `saver.FORMAT.BINARY` for raw binary data.
+  - Previously, this library was designed to save and load a Lua table to persistent storage. But sometimes you want to operate with binary data, like images, audio, etc. Now you can use `saver.save_binary_by_name`/`saver.load_binary_by_name` and `saver.save_binary_by_path`/`saver.load_binary_by_path` for raw binary data.
 - Better file format detection and improved internal implementation
 - More consistent API for saving and loading files
 - Deprecated `saver.storage` module

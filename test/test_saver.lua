@@ -204,20 +204,20 @@ return function()
 
 			-- Test save_binary_by_path and load_binary_by_path
 			local binary_path = "binary_test.bin"
-			local save_result = saver.save_file_by_path(binary_data, binary_path, saver.FORMAT.BINARY)
+			local save_result = saver.save_binary_by_path(binary_data, binary_path)
 			assert(save_result, "Should successfully save binary data")
 
-			local loaded_data = saver.load_file_by_path(binary_path, saver.FORMAT.BINARY)
+			local loaded_data = saver.load_binary_by_path(binary_path)
 			assert(loaded_data ~= nil, "Should load binary data successfully")
 			assert(#loaded_data == #binary_data, "Binary data length should match")
 			assert(loaded_data == binary_data, "Binary data content should match exactly")
 
 			-- Test backward compatibility functions (save_binary and load_binary)
 			local compat_path = "binary_compat_test.bin"
-			local compat_save_result = saver.save_file_by_path(binary_data, compat_path, saver.FORMAT.BINARY)
+			local compat_save_result = saver.save_binary_by_path(binary_data, compat_path)
 			assert(compat_save_result, "Should successfully save binary data with legacy function")
 
-			local compat_loaded_data = saver.load_file_by_path(compat_path, saver.FORMAT.BINARY)
+			local compat_loaded_data = saver.load_binary_by_path(compat_path)
 			assert(compat_loaded_data ~= nil, "Should load binary data successfully with legacy function")
 			assert(#compat_loaded_data == #binary_data, "Binary data length should match with legacy function")
 			assert(compat_loaded_data == binary_data, "Binary data content should match exactly with legacy function")

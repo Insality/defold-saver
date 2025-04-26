@@ -36,7 +36,6 @@ M.FORMAT = {
 	JSON = "json",
 	LUA = "lua",
 	SERIALIZED = "serialized", -- For Lua tables (with userdata) saved using sys.save/sys.load
-	BINARY = "binary" -- For raw binary data (images, etc.)
 }
 
 function M.reset_state()
@@ -95,20 +94,14 @@ end
 
 ---Detect file format based on file path and content type
 ---@param filepath string The file path
----@param data any The data to save (optional, for saving)
----@return string format The file format (json, lua, binary, raw)
-function M.detect_format(filepath, data)
+---@return string format The file format (json, lua, serialized)
+function M.detect_format(filepath)
 	if filepath:sub(-5) == ".json" then
 		return M.FORMAT.JSON
 	elseif filepath:sub(-4) == ".lua" then
 		return M.FORMAT.LUA
 	else
-		-- For saving: determine if it's a Lua table (binary) or raw binary data
-		if data ~= nil and type(data) ~= "table" then
-			return M.FORMAT.BINARY
-		else
-			return M.FORMAT.SERIALIZED
-		end
+		return M.FORMAT.SERIALIZED
 	end
 end
 
@@ -285,9 +278,10 @@ function M.load_binary(filepath)
 	return data
 end
 
+
 ---Load the file from internal save directory
 ---@param filepath string The save file path in save directory
----@return table|string|nil result The loaded data, or nil if the file can't be loaded
+---@return table|nil result The loaded data, or nil if the file can't be loaded
 function M.load_file_by_path(filepath)
 	local format = M.detect_format(filepath)
 
@@ -297,9 +291,6 @@ function M.load_file_by_path(filepath)
 		return M.load_lua(filepath)
 	elseif format == M.FORMAT.SERIALIZED then
 		return M.load_serialized(filepath)
-	elseif format == M.FORMAT.BINARY then
-		-- For binary format, directly load as raw binary
-		return M.load_binary(filepath)
 	end
 
 	return nil
@@ -347,7 +338,7 @@ function M.save_file_by_path(data, filepath, format)
 		return M.save_html5(data, filepath)
 	end
 
-	format = format or M.detect_format(filepath, data)
+	format = format or M.detect_format(filepath)
 
 	if format == M.FORMAT.JSON then
 		---@cast data table
@@ -358,9 +349,6 @@ function M.save_file_by_path(data, filepath, format)
 	elseif format == M.FORMAT.SERIALIZED then
 		---@cast data table
 		return M.save_serialized(data, filepath)
-	elseif format == M.FORMAT.BINARY then
-		---@cast data string
-		return M.save_binary(data, filepath)
 	end
 
 	M.logger:error("Unknown format for saving", format)
@@ -485,9 +473,9 @@ local GET_LOCAL_STORAGE = [[
 
 ---Load the data from the local storage in HTML5
 ---@param path string The path to the data in the local storage
----@param format string|nil If "binary", then the data will not be decoded from base64
+---@param load_as_binary_data boolean|nil If true, then the data will be loaded as binary data
 ---@return table|nil data The loaded data
-function M.load_html5(path, format)
+function M.load_html5(path, load_as_binary_data)
 	local web_data = html5.run(string.format(GET_LOCAL_STORAGE, path))
 	if not web_data or web_data == "" then
 		M.logger:debug("No data in local storage", path)
@@ -496,7 +484,7 @@ function M.load_html5(path, format)
 
 	local decoded = defold_saver.decode_base64(web_data)
 
-	if format == M.FORMAT.BINARY then
+	if load_as_binary_data then
 		return decoded
 	end
 
@@ -522,7 +510,7 @@ local SET_LOCAL_STORAGE = [[
 ]]
 
 ---Save the data to the local storage in HTML5
----@param data table|string The data to save
+---@param data table|string The data to save. If string it's a binary data
 ---@param path string The path to the data in the local storage
 ---@return boolean true if the data was saved successfully, false otherwise
 function M.save_html5(data, path)
