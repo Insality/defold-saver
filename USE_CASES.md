@@ -305,57 +305,6 @@ save_image("assets/my_image.png", "saved_image.png")
 load_image("saved_image.png", gui.get_node("image_node"))
 ```
 
-## Saving and Loading Lua Tables with Defold Userdata
-
-When working with Lua tables that contain Defold userdata like `vmath.vector3`, `hash`, or other Defold-specific types, you need to use binary or serialized format to preserve these values:
-
-```lua
-local saver = require("saver.saver")
-
--- Save player data including position (vector3) and object ID (hash)
-local function save_player_data(player)
-    local player_data = {
-        position = player.position,       -- vmath.vector3
-        rotation = player.rotation,       -- vmath.quat
-        id = player.id,                  -- hash
-        velocity = player.velocity,      -- vmath.vector3
-        game_objects = player.game_objects -- might contain go.* references
-    }
-
-    local success = saver.save_binary_by_name(player_data, "player_data")
-    return success
-end
-
--- Load player data
-local function load_player_data()
-    local player_data = saver.load_binary_by_name("player_data")
-    if not player_data then
-        print("Failed to load player data")
-        return nil
-    end
-
-    -- Now you can safely use the Defold userdata
-    local position = player_data.position -- This is a valid vmath.vector3
-    local id = player_data.id            -- This is a valid hash
-
-    return player_data
-end
-
--- Usage example
-local player = {
-    position = vmath.vector3(100, 200, 0),
-    rotation = vmath.quat_rotation_z(math.rad(45)),
-    id = hash("player"),
-    velocity = vmath.vector3(5, 0, 0),
-}
-
-save_player_data(player)
-local loaded_player = load_player_data()
-
--- You can now use the loaded data with all userdata intact
-print("Player position:", loaded_player.position)
-```
-
 ## Explicitly Selecting Format
 
 If you need more control over the format, you can explicitly specify it when saving or loading files:
