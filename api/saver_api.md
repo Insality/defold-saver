@@ -68,13 +68,16 @@ saver.set_logger(log.get_logger("saver"))
 
 ---
 ```lua
-saver.init()
+saver.init([config])
 ```
 
 Initialize the Saver module. Should be called at the start of your game to set up the module.
 Call it after saver.set_migrations if you are using migrations.
 This function loads the game state from a file and starts the autosave timer.
 If the game state file does not exist, a new game state is created.
+
+- **Parameters:**
+	- `[config]` *(saver.config|nil)*: Configuration table.
 
 - **Example Usage:**
 
@@ -392,8 +395,7 @@ saver.load_file_by_name(filename, [format])
 ```
 
 Loads the data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
----
-  NOTE: For binary data like images, always specify FORMAT.BINARY explicitly to avoid potential crashes.
+  NOTE: For binary data like images, use saver.load_binary_by_name instead.
 
 - **Parameters:**
 	- `filename` *(string)*: The name of the file to load the data from. Can contain subfolders.

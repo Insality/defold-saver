@@ -46,7 +46,7 @@ After that, select `Project ▸ Fetch Libraries` to update [library dependencies
 
 ### Configuration [optional]
 
-You should configure the module in the `game.project` file:
+You can configure the module in the `game.project` file:
 
 ```ini
 [saver]
@@ -57,6 +57,17 @@ saver_key = saver
 lua_require_as_string = 0
 ```
 
+All of these settings you can also set in the `saver.init` function.
+
+```lua
+saver.init({
+	save_name = "game",
+	save_folder = "Defold Saver",
+	autosave_timer = 3,
+	saver_key = "saver",
+	lua_require_as_string = 0,
+})
+```
 This configuration section for `game.project` defines various settings:
 
 - **save_name**: The name of the save file. Default is `game`. The file will be stored in the `save_folder` folder. Can have an extension like `.json`, `.lua` (but will not keep the userdata types like `vmath.vector3`, `hash` etc).
@@ -233,6 +244,10 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 - More consistent API for saving and loading files
 - Deprecated `saver.storage` module
   - Now you should use `saver.set_value` and `saver.get_value` for key-value storage
+
+### **V5**
+- #10 Add Configuration options via api to `saver.init(config)` to cover all `game.project` settings
+
 </details>
 
 

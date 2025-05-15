@@ -36,6 +36,15 @@ end
 ---@field saver saver.state Saver state
 ---@field storage saver.storage.state Storage state
 
+---Configuration table for `saver.init` to setup all things you can in game.project file
+---@class saver.config
+---@field save_folder string? Save folder name. Default is project name without special characters
+---@field save_name string? Save file name, use ".json" or ".lua" extension to use these formats. Default is "game"
+---@field saver_key string? Saver key, where saver internal data will be stored. Default is "saver"
+---@field storage_key string? Storage key, where storage internal data will be stored. Deprecated. Default is "storage"
+---@field autosave_timer number? Autosave timer in seconds. Default is 3 seconds
+---@field lua_require_as_string boolean? If true, the `require()` function will load Lua files as strings instead of Lua tables. Default is false
+
 ---Logger interface
 ---@class saver.logger
 ---@field trace fun(logger: saver.logger, message: string, data: any|nil)
@@ -76,7 +85,17 @@ end
 ---This function loads the game state from a file and starts the autosave timer.
 ---If the game state file does not exist, a new game state is created.
 ---		saver.init()
-function M.init()
+---@param config saver.config|nil Configuration table.
+function M.init(config)
+	if config then
+		DIRECTORY_PATH = config.save_folder or DIRECTORY_PATH
+		SAVE_NAME = config.save_name or SAVE_NAME
+		SAVER_KEY = config.saver_key or SAVER_KEY
+		STORAGE_KEY = config.storage_key or STORAGE_KEY
+		DEFAULT_AUTOSAVE_TIMER = config.autosave_timer or DEFAULT_AUTOSAVE_TIMER
+		saver_internal.LUA_REQUIRE_AS_STRING = config.lua_require_as_string or saver_internal.LUA_REQUIRE_AS_STRING
+	end
+
 	M.load_game_state()
 	M.check_game_version()
 	M.set_autosave_timer(DEFAULT_AUTOSAVE_TIMER)

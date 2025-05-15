@@ -2,7 +2,6 @@ local M = {}
 
 --- Use empty function to save a bit of memory
 local EMPTY_FUNCTION = function(_, message, context) end
-local LUA_REQUIRE_AS_STRING = sys.get_config_int("saver.lua_require_as_string", 0) == 1
 
 ---@type saver.logger
 M.empty_logger = {
@@ -27,6 +26,8 @@ M.logger = {
 ---Contains the current game state data
 ---@type saver.game_state
 M.GAME_STATE = nil
+
+M.LUA_REQUIRE_AS_STRING = sys.get_config_int("saver.lua_require_as_string", 0) == 1
 
 -- Persistent storage for saver table
 M.state = nil
