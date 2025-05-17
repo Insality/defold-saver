@@ -13,7 +13,9 @@ function M.render_properties_panel(saver, druid, properties_panel)
 	properties_panel:add_button(function(button)
 		button:set_text_property("Game State")
 		button:set_text_button("Save")
-		saver.save_game_state()
+		button.button.on_click:subscribe(function()
+			saver.save_game_state()
+		end)
 	end)
 
 	properties_panel:add_button(function(button)
@@ -110,6 +112,11 @@ function M.render_properties_panel(saver, druid, properties_panel)
 			saver.set_autosave_timer(value)
 		end)
 		input:set_text_value(saver.get_autosave_timer())
+	end)
+
+	properties_panel:add_text(function(text)
+		text:set_text_property("Version")
+		text:set_text_value(tostring(saver.get_save_version()))
 	end)
 end
 
