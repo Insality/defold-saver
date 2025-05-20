@@ -188,7 +188,7 @@ function M.load_lua(filepath)
 		return nil
 	end
 
-	if LUA_REQUIRE_AS_STRING then
+	if M.LUA_REQUIRE_AS_STRING then
 		-- Replace all require("some.path") to "/some/path.lua"
 		file_data = file_data:gsub('require%("([^"]+)"%)', function(path)
 			return string.format('"/%s"', path:gsub("%.", "/") .. ".lua")
@@ -446,7 +446,7 @@ function M.table_to_lua_string(tbl, indent, is_array)
 			local v_is_array = #v > 0
 			result = result .. M.table_to_lua_string(v, indent .. "    ", v_is_array)
 		elseif type(v) == "string" then
-			local is_require = LUA_REQUIRE_AS_STRING and v:sub(-1) == ')' and v:sub(1, 8) == 'require('
+			local is_require = M.LUA_REQUIRE_AS_STRING and v:sub(-1) == ')' and v:sub(1, 8) == 'require('
 			if is_require then
 				result = result .. v
 			else
