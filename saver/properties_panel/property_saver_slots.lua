@@ -1,5 +1,3 @@
-local color = require("druid.color")
-
 ---@class druid.widget.property_three_buttons: druid.widget
 ---@field root node
 ---@field container druid.container
@@ -55,11 +53,6 @@ end
 function M:set_text_property(text)
 	self.text_name:set_text(text)
 	return self
-end
-
-
-function M:set_color(color_value)
-	color.set_color(self:get_node("button"), color_value)
 end
 
 
