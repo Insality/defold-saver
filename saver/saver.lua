@@ -434,6 +434,9 @@ function M.get_save_path(filename)
 
 	-- If filename contains "/" extract subfolder to the dir_name
 	local directory_path = DIRECTORY_PATH
+	-- For windows we can't make subfolders, but we can use _ instead of \
+	filename = filename:gsub("\\", "_")
+
 	if filename:find("/") then
 		local splitted = saver_internal.split(filename, "/")
 		filename = splitted[#splitted]
