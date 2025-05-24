@@ -112,7 +112,7 @@ end
 ---@param filepath string The file path
 ---@return boolean success Whether the save was successful
 function M.save_json(data, filepath)
-	local file = io.open(filepath, "w+")
+	local file = io.open(filepath, "wb")
 	if not file then
 		M.logger:error("Can't open file for writing", filepath)
 		return false
@@ -157,7 +157,7 @@ end
 ---@param filepath string The file path
 ---@return boolean success Whether the save was successful
 function M.save_lua(data, filepath)
-	local file = io.open(filepath, "w+")
+	local file = io.open(filepath, "wb")
 	if not file then
 		M.logger:error("Can't open file for writing", filepath)
 		return false
