@@ -18,6 +18,7 @@ local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
+local IS_WINDOWS = sys.get_sys_info().system_name == "Windows"
 
 -- If several instances of the game are running, then we using instance index to avoid conflicts
 local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
@@ -434,6 +435,7 @@ function M.get_save_path(filename)
 
 	-- If filename contains "/" extract subfolder to the dir_name
 	local directory_path = DIRECTORY_PATH
+
 	-- For windows we can't make subfolders, but we can use _ instead of \
 	filename = filename:gsub("\\", "_")
 
@@ -441,6 +443,11 @@ function M.get_save_path(filename)
 		local splitted = saver_internal.split(filename, "/")
 		filename = splitted[#splitted]
 		directory_path = directory_path .. "/" .. table.concat(splitted, "/", 1, #splitted - 1)
+	end
+
+	-- If we on windows, replace all subfolders with _
+	if IS_WINDOWS then
+		directory_path = directory_path:gsub("/", "_")
 	end
 
 	return sys.get_save_file(directory_path, filename)
