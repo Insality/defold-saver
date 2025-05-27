@@ -423,15 +423,28 @@ end
 
 
 ---Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
+---		local folder_path = saver.get_save_path()
+---		print(folder_path) -- "/Users/user/Library/Application Support/Defold Saver/"
+---
 ---		local file_path = saver.get_save_path("data.json")
 ---		print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"
 ---
 ---		local file_path_2 = saver.get_save_path("profiles/profile1.json")
 ---		print(file_path_2) -- "/Users/user/Library/Application Support/Defold Saver/profiles/profile1.json"
----@param filename string The name of the file to get the path for. Can contain subfolders.
+---@param filename string|nil The name of the file to get the path for. Can contain subfolders. If nil, returns the folder path.
 ---@return string path The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
 function M.get_save_path(filename)
-	assert(filename, "Can't get save path without filename")
+	-- If no filename provided, return just the folder path
+	if not filename then
+		local directory_path = DIRECTORY_PATH
+		-- If we on windows, replace all subfolders with _
+		if IS_WINDOWS then
+			directory_path = directory_path:gsub("/", "_")
+		end
+		local folder_path = sys.get_save_file(directory_path, "")
+		--folder_path = folder_path:gsub("[^/\\]*$", "") --
+		return folder_path
+	end
 
 	-- If filename contains "/" extract subfolder to the dir_name
 	local directory_path = DIRECTORY_PATH
