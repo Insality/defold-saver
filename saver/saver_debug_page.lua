@@ -11,7 +11,7 @@ function M.render_properties_panel(saver, druid, properties_panel)
 	properties_panel:set_header("Saver Panel")
 
 	properties_panel:add_button(function(button)
-		button:set_text_property("Game State")
+		button:set_text_property("Save Game")
 		button:set_text_button("Save")
 		button.button.on_click:subscribe(function()
 			saver.save_game_state()
@@ -19,7 +19,16 @@ function M.render_properties_panel(saver, druid, properties_panel)
 	end)
 
 	properties_panel:add_button(function(button)
-		button:set_text_property("Game State")
+		button:set_text_property("Save Folder")
+		button:set_text_button("Open")
+		button:set_color("#7D6034")
+		button.button.on_click:subscribe(function()
+			M.open_at_desktop(saver.get_save_path())
+		end)
+	end)
+
+	properties_panel:add_button(function(button)
+		button:set_text_property("Inspect State")
 		button:set_text_button("Inspect")
 		button.button.on_click:subscribe(function()
 			properties_panel:next_scene()
@@ -70,35 +79,32 @@ function M.render_properties_panel(saver, druid, properties_panel)
 		three_buttons:set_text_property("Delete Slot")
 
 		three_buttons.button_1.on_click:subscribe(function()
-			print("Hold button to delete slot 1")
+			print("You pressed delete button. Hold to confirm.")
 		end)
 		three_buttons.button_1.on_long_click:subscribe(function()
 			saver.delete_game_state("saver_slot_1")
-			sys.reboot()
 		end)
 
 		three_buttons.button_2.on_click:subscribe(function()
-			print("Hold button to delete slot 2")
+			print("You pressed delete button. Hold to confirm.")
 		end)
 		three_buttons.button_2.on_long_click:subscribe(function()
 			saver.delete_game_state("saver_slot_2")
-			sys.reboot()
 		end)
 
 		three_buttons.button_3.on_click:subscribe(function()
-			print("Hold button to delete slot 3")
+			print("You pressed delete button. Hold to confirm.")
 		end)
 		three_buttons.button_3.on_long_click:subscribe(function()
 			saver.delete_game_state("saver_slot_3")
-			sys.reboot()
 		end)
 
 		return three_buttons
 	end)
 
 	properties_panel:add_button(function(button)
-		button:set_text_property("Game State")
-		button:set_text_button("pprint")
+		button:set_text_property("pprint")
+		button:set_text_button("Game State")
 		button.button.on_click:subscribe(function()
 			pprint(saver.get_game_state())
 		end)
@@ -118,6 +124,25 @@ function M.render_properties_panel(saver, druid, properties_panel)
 		text:set_text_property("Version")
 		text:set_text_value(tostring(saver.get_save_version()))
 	end)
+end
+
+
+---@param path string
+---@return boolean
+function M.open_at_desktop(path)
+	local system = sys.get_sys_info().system_name
+	if system == "Windows" then
+		os.execute(string.format('explorer /select,"%s"', path))
+		return true
+	elseif system == "Linux" then
+		os.execute(string.format("xdg-open %q", path))
+		return true
+	elseif system == "Darwin" then
+		os.execute(string.format("open -R %q", path))
+		return true
+	end
+
+	return false
 end
 
 
