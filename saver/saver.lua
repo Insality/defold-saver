@@ -102,7 +102,7 @@ function M.init(config)
 	M.check_game_version()
 	M.set_autosave_timer(DEFAULT_AUTOSAVE_TIMER)
 
-	saver_internal.logger:info("Save loaded", M.get_game_state()[SAVER_KEY])
+	saver_internal.logger:debug("Saver initialized")
 end
 
 
