@@ -60,15 +60,15 @@ function M.render_properties_panel(saver, druid, properties_panel)
 
 		three_buttons.button_1.on_click:subscribe(function()
 			saver.load_game_state("saver_slot_1")
-			sys.reboot()
+			sys.reboot("--config=saver.save_name=saver_slot_1", "--config=saver.autosave_timer=0")
 		end)
 		three_buttons.button_2.on_click:subscribe(function()
 			saver.load_game_state("saver_slot_2")
-			sys.reboot()
+			sys.reboot("--config=saver.save_name=saver_slot_2", "--config=saver.autosave_timer=0")
 		end)
 		three_buttons.button_3.on_click:subscribe(function()
 			saver.load_game_state("saver_slot_3")
-			sys.reboot()
+			sys.reboot("--config=saver.save_name=saver_slot_3", "--config=saver.autosave_timer=0")
 		end)
 
 		return three_buttons
