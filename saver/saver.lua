@@ -18,7 +18,9 @@ local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
-local IS_WINDOWS = sys.get_sys_info().system_name == "Windows"
+local SYSTEM_NAME = sys.get_sys_info().system_name
+local IS_WINDOWS = SYSTEM_NAME == "Windows"
+local IS_LINUX = SYSTEM_NAME == "Linux"
 
 -- If several instances of the game are running, then we using instance index to avoid conflicts
 local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
@@ -371,7 +373,8 @@ function M.save_file_by_name(data, filename, format)
 		return false
 	end
 
-	return M.save_file_by_path(data, M.get_save_path(filename), format)
+	local path = M.get_save_path(filename)
+	return M.save_file_by_path(data, path, format)
 end
 
 
@@ -437,33 +440,16 @@ function M.get_save_path(filename)
 	-- If no filename provided, return just the folder path
 	if not filename then
 		local directory_path = DIRECTORY_PATH
-		-- If we on windows, replace all subfolders with _
-		if IS_WINDOWS then
-			directory_path = directory_path:gsub("/", "_")
-		end
-		local folder_path = sys.get_save_file(directory_path, "")
-		--folder_path = folder_path:gsub("[^/\\]*$", "") --
-		return folder_path
+		return sys.get_save_file(directory_path, "")
 	end
 
-	-- If filename contains "/" extract subfolder to the dir_name
-	local directory_path = DIRECTORY_PATH
-
-	-- For windows we can't make subfolders, but we can use _ instead of \
-	filename = filename:gsub("\\", "_")
-
-	if filename:find("/") then
-		local splitted = saver_internal.split(filename, "/")
-		filename = splitted[#splitted]
-		directory_path = directory_path .. "/" .. table.concat(splitted, "/", 1, #splitted - 1)
+	-- Only this OS can't make subfolders, so we need to replace all "/" with "_". Should be fixed?
+	-- MacOS is okay with that
+	if IS_WINDOWS or IS_LINUX then
+		filename = filename:gsub("/", "_")
 	end
 
-	-- If we on windows, replace all subfolders with _
-	if IS_WINDOWS then
-		directory_path = directory_path:gsub("/", "_")
-	end
-
-	return sys.get_save_file(directory_path, filename)
+	return sys.get_save_file(DIRECTORY_PATH, filename)
 end
 
 
