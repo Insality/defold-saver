@@ -18,9 +18,6 @@ local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
-local SYSTEM_NAME = sys.get_sys_info().system_name
-local IS_WINDOWS = SYSTEM_NAME == "Windows"
-local IS_LINUX = SYSTEM_NAME == "Linux"
 
 -- If several instances of the game are running, then we using instance index to avoid conflicts
 local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
@@ -443,11 +440,7 @@ function M.get_save_path(filename)
 		return sys.get_save_file(directory_path, "")
 	end
 
-	-- Only this OS can't make subfolders, so we need to replace all "/" with "_". Should be fixed?
-	-- MacOS is okay with that
-	if IS_WINDOWS or IS_LINUX then
-		filename = filename:gsub("/", "_")
-	end
+	filename = filename:gsub("/", "_")
 
 	return sys.get_save_file(DIRECTORY_PATH, filename)
 end
