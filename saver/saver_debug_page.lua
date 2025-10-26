@@ -1,12 +1,12 @@
+local saver = require("saver.saver")
 local properties_saver_slots = require("saver.properties_panel.property_saver_slots")
 
 local M = {}
 
 
----@param saver saver
 ---@param druid druid.instance
 ---@param properties_panel druid.widget.properties_panel
-function M.render_properties_panel(saver, druid, properties_panel)
+function M.render_properties_panel(druid, properties_panel)
 	properties_panel:next_scene()
 	properties_panel:set_header("Saver Panel")
 
@@ -21,7 +21,7 @@ function M.render_properties_panel(saver, druid, properties_panel)
 	properties_panel:add_button(function(button)
 		button:set_text_property("Save Folder")
 		button:set_text_button("Open")
-		button:set_color("#7D6034")
+		button:set_color("#6FA4DC")
 		button.button.on_click:subscribe(function()
 			M.open_at_desktop(saver.get_save_path())
 		end)

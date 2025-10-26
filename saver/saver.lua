@@ -9,7 +9,6 @@
 local storage = require("saver.storage")
 local migrations = require("saver.migrations")
 local saver_internal = require("saver.saver_internal")
-local saver_debug_page = require("saver.saver_debug_page")
 
 --- Take a default folder name as a project name without special characters
 local PROJECT_NAME = sys.get_config_string("project.title"):gsub("[^%w_ ]", "")
@@ -638,12 +637,6 @@ function M.is_value_exists(key_id)
 	return M.get_game_state()[SAVER_KEY].storage[key_id] ~= nil
 end
 
-
----@param druid druid.instance
----@param properties_panel druid.widget.properties_panel
-function M.render_properties_panel(druid, properties_panel)
-	saver_debug_page.render_properties_panel(M, druid, properties_panel)
-end
 
 ---A callback that is called before the saver saves the game state.
 ---You can use it to perform additional actions before saving the game state.
