@@ -100,7 +100,7 @@ function M.init(config)
 	M.check_game_version()
 	M.set_autosave_timer(DEFAULT_AUTOSAVE_TIMER)
 
-	saver_internal.logger:debug("Saver initialized")
+	saver_internal.logger:debug("Saver initialized", { save_name = SAVE_NAME, instance_index = INSTANCE_INDEX })
 end
 
 
