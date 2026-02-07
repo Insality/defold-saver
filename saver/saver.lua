@@ -100,7 +100,7 @@ function M.init(config)
 	M.check_game_version()
 	M.set_autosave_timer(DEFAULT_AUTOSAVE_TIMER)
 
-	saver_internal.logger:info("Save loaded", M.get_game_state()[SAVER_KEY])
+	saver_internal.logger:debug("Saver initialized", { save_name = SAVE_NAME, instance_index = INSTANCE_INDEX })
 end
 
 
@@ -369,7 +369,8 @@ function M.save_file_by_name(data, filename, format)
 		return false
 	end
 
-	return M.save_file_by_path(data, M.get_save_path(filename), format)
+	local path = M.get_save_path(filename)
+	return M.save_file_by_path(data, path, format)
 end
 
 
@@ -421,25 +422,26 @@ end
 
 
 ---Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
+---		local folder_path = saver.get_save_path()
+---		print(folder_path) -- "/Users/user/Library/Application Support/Defold Saver/"
+---
 ---		local file_path = saver.get_save_path("data.json")
 ---		print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"
 ---
 ---		local file_path_2 = saver.get_save_path("profiles/profile1.json")
 ---		print(file_path_2) -- "/Users/user/Library/Application Support/Defold Saver/profiles/profile1.json"
----@param filename string The name of the file to get the path for. Can contain subfolders.
+---@param filename string|nil The name of the file to get the path for. Can contain subfolders. If nil, returns the folder path.
 ---@return string path The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
 function M.get_save_path(filename)
-	assert(filename, "Can't get save path without filename")
-
-	-- If filename contains "/" extract subfolder to the dir_name
-	local directory_path = DIRECTORY_PATH
-	if filename:find("/") then
-		local splitted = saver_internal.split(filename, "/")
-		filename = splitted[#splitted]
-		directory_path = directory_path .. "/" .. table.concat(splitted, "/", 1, #splitted - 1)
+	-- If no filename provided, return just the folder path
+	if not filename then
+		local directory_path = DIRECTORY_PATH
+		return sys.get_save_file(directory_path, "")
 	end
 
-	return sys.get_save_file(directory_path, filename)
+	filename = filename:gsub("/", "_")
+
+	return sys.get_save_file(DIRECTORY_PATH, filename)
 end
 
 
@@ -460,6 +462,13 @@ end
 function M.set_autosave_timer(timer)
 	AUTOSAVE_TIMER = timer
 	M.schedule_autosave()
+end
+
+
+---Returns the current autosave timer.
+---@return number timer The current autosave timer.
+function M.get_autosave_timer()
+	return AUTOSAVE_TIMER
 end
 
 

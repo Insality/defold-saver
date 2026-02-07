@@ -26,10 +26,10 @@
 
 Open your `game.project` file and add the following line to the dependencies field under the project section:
 
-**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/5.zip)**
+**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/6.zip)**
 
 ```
-https://github.com/Insality/defold-saver/archive/refs/tags/5.zip
+https://github.com/Insality/defold-saver/archive/refs/tags/6.zip
 ```
 
 After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
@@ -179,20 +179,12 @@ saver.get_save_version()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
 saver.before_save_callback = function() "Called before saver saves data" end
-
----@deprecated Use `saver.set_value` and `saver.get_value` instead
-local storage = require("saver.storage")
-storage.set(id, value)
-storage.get(id, [default_value])
-storage.get_number(id, [default_value])
-storage.get_string(id, [default_value])
-storage.get_boolean(id, [default_value])
 ```
 
 ### API Reference
 
 - Saver API: [saver_api.md](api/saver_api.md)
-- Storage API: [storage_api.md](api/storage_api.md) (deprecated, use `saver.set_value` and `saver.get_value` instead)
+- Saver Config API: [saver_config_api.md](api/saver_config_api.md)
 
 
 ## Use Cases
@@ -247,6 +239,12 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 
 ### **V5**
 - #10 Add Configuration options via api to `saver.init(config)` to cover all `game.project` settings
+
+### **V6**
+- The `savet.get_save_path(nil)` now returns the folder path
+- Add `saver.get_autosave_timer()` function to get the seconds between autosaves
+- Replace all subfolders with a `_` character in the paths, since subfolders are not supported by all platforms
+- Removed docs for deprecated `saver.storage` module
 
 </details>
 

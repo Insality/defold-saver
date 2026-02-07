@@ -27,13 +27,13 @@
 - [get_save_path](#get_save_path)
 - [get_save_version](#get_save_version)
 - [set_autosave_timer](#set_autosave_timer)
+- [get_autosave_timer](#get_autosave_timer)
 - [get_current_game_project_folder](#get_current_game_project_folder)
 - [set_migrations](#set_migrations)
 - [apply_migrations](#apply_migrations)
 - [get_value](#get_value)
 - [set_value](#set_value)
 - [is_value_exists](#is_value_exists)
-
 ## Fields
 
 - [autosave_timer_id](#autosave_timer_id)
@@ -469,13 +469,13 @@ local is_header_downloaded = saver.is_file_exists_by_name("/cache/header.png")
 
 ---
 ```lua
-saver.get_save_path(filename)
+saver.get_save_path([filename])
 ```
 
 Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
 
 - **Parameters:**
-	- `filename` *(string)*: The name of the file to get the path for. Can contain subfolders.
+	- `[filename]` *(string|nil)*: The name of the file to get the path for. Can contain subfolders. If nil, returns the folder path.
 
 - **Returns:**
 	- `path` *(string)*: The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
@@ -483,6 +483,8 @@ Returns the absolute path to the game save folder. If a file name is provided, t
 - **Example Usage:**
 
 ```lua
+local folder_path = saver.get_save_path()
+print(folder_path) -- "/Users/user/Library/Application Support/Defold Saver/"
 local file_path = saver.get_save_path("data.json")
 print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"
 local file_path_2 = saver.get_save_path("profiles/profile1.json")
@@ -525,6 +527,18 @@ Use 0 to disable autosave.
 saver.set_autosave_timer(5) -- Autosave every 5 seconds
 saver.set_autosave_timer(0) -- Disable autosave
 ```
+### get_autosave_timer
+
+---
+```lua
+saver.get_autosave_timer()
+```
+
+Returns the current autosave timer.
+
+- **Returns:**
+	- `timer` *(number)*: The current autosave timer.
+
 ### get_current_game_project_folder
 
 ---
