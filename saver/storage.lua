@@ -1,4 +1,5 @@
 --- Storage module
+--- @deprecated Use `saver.set_value` and `saver.get_value` instead
 --- This module is used to store the key-value data in the persistent storage.
 --- The data is stored in the `M.state` table. And it can be saved to the file.
 --- The value can be a string, number or boolean.
