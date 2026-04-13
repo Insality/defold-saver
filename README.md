@@ -150,7 +150,6 @@ saver.delete_file_by_path(absolute_file_path)
 saver.is_file_exists_by_path(absolute_file_path)
 
 -- File Handling by relative path in application data folder (from sys.get_save_path())
--- Subfolders are supported
 saver.save_file_by_name(data, file_name, [format])
 saver.load_file_by_name(file_name, [format])
 saver.save_binary_by_name(data, file_name)
