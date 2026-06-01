@@ -17,6 +17,7 @@ local SAVE_NAME = sys.get_config_string("saver.save_name", "game")
 local SAVER_KEY = sys.get_config_string("saver.saver_key", "saver")
 local DEFAULT_AUTOSAVE_TIMER = sys.get_config_int("saver.autosave_timer", 3)
 local STORAGE_KEY = sys.get_config_string("saver.storage_key", "storage") -- deprecated
+local IS_WINDOWS = sys.get_sys_info().system_name == "Windows"
 
 -- If several instances of the game are running, then we using instance index to avoid conflicts
 local INSTANCE_INDEX = sys.get_config_int("project.instance_index", 0)
@@ -531,28 +532,29 @@ function M.get_current_game_project_folder()
 	if not io.popen or html5 then
 		return nil
 	end
+	
+	local file = io.popen(IS_WINDOWS and "cd" or "pwd")
 
-	local file = io.popen("pwd")
 	if not file then
 		return nil
 	end
 
-	local pwd = file:read("*l")
+	local path = file:read("*l")
 	file:close()
 
-	if not pwd then
+	if not path then
 		return nil
 	end
 
 	-- Check the game.project file exists in this folder
-	local game_project_path = pwd .. "/game.project"
+	local game_project_path = path .. "/game.project"
 	local game_project_file = io.open(game_project_path, "r")
 	if not game_project_file then
 		return nil
 	end
 
 	game_project_file:close()
-	return pwd
+	return path
 end
 
 
