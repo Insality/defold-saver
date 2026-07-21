@@ -26,10 +26,10 @@
 
 Open your `game.project` file and add the following line to the dependencies field under the project section:
 
-**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/7.zip)**
+**[Saver](https://github.com/Insality/defold-saver/archive/refs/tags/8.zip)**
 
 ```
-https://github.com/Insality/defold-saver/archive/refs/tags/7.zip
+https://github.com/Insality/defold-saver/archive/refs/tags/8.zip
 ```
 
 After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
@@ -247,6 +247,9 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 
 ### **V7**
 - Fix for window path for get project path function
+
+### **V8**
+- Fix save path filenames by replacing `\`, `/`, and `:` with `_` for Windows compatibility
 
 </details>
 

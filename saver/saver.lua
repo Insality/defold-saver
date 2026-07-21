@@ -440,7 +440,7 @@ function M.get_save_path(filename)
 		return sys.get_save_file(directory_path, "")
 	end
 
-	filename = filename:gsub("/", "_")
+	filename = filename:gsub("[\\/:]", "_")
 
 	return sys.get_save_file(DIRECTORY_PATH, filename)
 end
