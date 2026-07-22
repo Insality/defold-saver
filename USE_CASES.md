@@ -175,7 +175,7 @@ load_game_state("game_state_1.json")
 With **Defold Saver** module you also can save and load files. You able to use next functions:
 
 ```lua
--- This function will save the data inside you game save folder. You can use subfolders in the path
+-- This function will save the data inside you game save folder.
 -- file name should contain the file name and extension
 saver.save_file_by_name(data, file_name)
 saver.load_file_by_name(file_name)

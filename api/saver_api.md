@@ -248,7 +248,7 @@ local data = {
 -- Get project path works on build from the Defold Editor only
 local project_path = saver.get_current_game_project_folder()
 -- Use path to the resources folder
-local file_path = saver.get_save_path(project_path .. "/resources/data.json")
+local file_path = project_path .. "/resources/data.json"
 saver.save_file_by_path(data, file_path)
 ```
 ### save_binary_by_path
@@ -290,7 +290,7 @@ Loads the data from a file at the specified path.
 -- Get project path works on build from the Defold Editor only
 local project_path = saver.get_current_game_project_folder()
 -- Use path to the resources folder
-local file_path = saver.get_save_path(project_path .. "/resources/data.json")
+local file_path = project_path .. "/resources/data.json"
 local data = saver.load_file_by_path(file_path)
 pprint(data)
 ```
@@ -351,11 +351,11 @@ local is_project_file_exists = saver.is_file_exists_by_path(absolute_path_to_fil
 saver.save_file_by_name(data, filename, [format])
 ```
 
-Saves the specified data to a file with the specified name. The file is saved in the game save folder. Filename supports subfolders.
+Saves the specified data to a file with the specified name. The file is saved in the game save folder.
 
 - **Parameters:**
 	- `data` *(table)*: The lua table to save to the file.
-	- `filename` *(string)*: The name of the file to save the data to. Can contain subfolders.
+	- `filename` *(string)*: The name of the file to save the data to.
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary)
 
 - **Returns:**
@@ -382,7 +382,7 @@ Saves the specified data to a file with the specified name. The data format is b
 
 - **Parameters:**
 	- `data` *(string)*: The binary data to save to the file.
-	- `filename` *(string)*: The name of the file to save the data to. Can contain subfolders.
+	- `filename` *(string)*: The name of the file to save the data to.
 
 - **Returns:**
 	- `is_saved` *(boolean)*: true if the file was saved successfully, false otherwise.
@@ -394,11 +394,11 @@ Saves the specified data to a file with the specified name. The data format is b
 saver.load_file_by_name(filename, [format])
 ```
 
-Loads the data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
+Loads the data from a file with the specified name. The file is loaded from the game save folder.
   NOTE: For binary data like images, use saver.load_binary_by_name instead.
 
 - **Parameters:**
-	- `filename` *(string)*: The name of the file to load the data from. Can contain subfolders.
+	- `filename` *(string)*: The name of the file to load the data from.
 	- `[format]` *(string|nil)*: Optional format override (json, lua, serialized, binary)
 
 - **Returns:**
@@ -417,10 +417,10 @@ pprint(data)
 saver.load_binary_by_name(filename)
 ```
 
-Loads the binary data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
+Loads the binary data from a file with the specified name. The file is loaded from the game save folder.
 
 - **Parameters:**
-	- `filename` *(string)*: The name of the file to load the binary data from. Can contain subfolders.
+	- `filename` *(string)*: The name of the file to load the binary data from.
 
 - **Returns:**
 	- `data` *(string|nil)*: The binary data loaded from the file. If the file does not exist, returns nil.
@@ -432,10 +432,10 @@ Loads the binary data from a file with the specified name. The file is loaded fr
 saver.delete_file_by_name(filename)
 ```
 
-Deletes the file with the specified name. The file is deleted from the game save folder. Filename supports subfolders.
+Deletes the file with the specified name. The file is deleted from the game save folder.
 
 - **Parameters:**
-	- `filename` *(string)*: The name of the file to delete. Can contain subfolders.
+	- `filename` *(string)*: The name of the file to delete.
 
 - **Returns:**
 	- `is_deleted` *(boolean)*: true if the file was deleted successfully, false otherwise.
@@ -452,10 +452,10 @@ saver.delete_file_by_name("data.json")
 saver.is_file_exists_by_name(filename)
 ```
 
-Checks if the file exists with the specified name. The file is checked in the game save folder. Filename supports subfolders.
+Checks if the file exists with the specified name. The file is checked in the game save folder.
 
 - **Parameters:**
-	- `filename` *(string)*: The name of the file to check. Can contain subfolders.
+	- `filename` *(string)*: The name of the file to check.
 
 - **Returns:**
 	- `is_exists` *(boolean)*: true if the file exists, false otherwise.
@@ -463,7 +463,7 @@ Checks if the file exists with the specified name. The file is checked in the ga
 - **Example Usage:**
 
 ```lua
-local is_header_downloaded = saver.is_file_exists_by_name("/cache/header.png")
+local is_header_downloaded = saver.is_file_exists_by_name("header.png")
 ```
 ### get_save_path
 
@@ -472,10 +472,10 @@ local is_header_downloaded = saver.is_file_exists_by_name("/cache/header.png")
 saver.get_save_path([filename])
 ```
 
-Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
+Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned.
 
 - **Parameters:**
-	- `[filename]` *(string|nil)*: The name of the file to get the path for. Can contain subfolders. If nil, returns the folder path.
+	- `[filename]` *(string|nil)*: The name of the file to get the path for. If nil, returns the folder path.
 
 - **Returns:**
 	- `path` *(string)*: The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
@@ -487,8 +487,6 @@ local folder_path = saver.get_save_path()
 print(folder_path) -- "/Users/user/Library/Application Support/Defold Saver/"
 local file_path = saver.get_save_path("data.json")
 print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"
-local file_path_2 = saver.get_save_path("profiles/profile1.json")
-print(file_path_2) -- "/Users/user/Library/Application Support/Defold Saver/profiles/profile1.json"
 ```
 ### get_save_version
 

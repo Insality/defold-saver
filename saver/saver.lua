@@ -264,7 +264,7 @@ end
 ---		-- Get project path works on build from the Defold Editor only
 ---		local project_path = saver.get_current_game_project_folder()
 ---		-- Use path to the resources folder
----		local file_path = saver.get_save_path(project_path .. "/resources/data.json")
+---		local file_path = project_path .. "/resources/data.json"
 ---		saver.save_file_by_path(data, file_path)
 ---@param data table The lua table to save to the file.
 ---@param path string The absolute path to save the file to. Contains the file name and extension. Extension can be empty, .json or .lua
@@ -292,7 +292,7 @@ end
 ---		-- Get project path works on build from the Defold Editor only
 ---		local project_path = saver.get_current_game_project_folder()
 ---		-- Use path to the resources folder
----		local file_path = saver.get_save_path(project_path .. "/resources/data.json")
+---		local file_path = project_path .. "/resources/data.json"
 ---		local data = saver.load_file_by_path(file_path)
 ---		pprint(data)
 ---@param path string The absolute path to load the file from. Contains the file name and extension.
@@ -347,7 +347,7 @@ function M.is_file_exists_by_path(path)
 end
 
 
----Saves the specified data to a file with the specified name. The file is saved in the game save folder. Filename supports subfolders.
+---Saves the specified data to a file with the specified name. The file is saved in the game save folder.
 ---		local data = {
 ---			score = 100,
 ---			level = 1
@@ -356,7 +356,7 @@ end
 ---		-- Save the data to the game save folder
 ---		saver.save_file_by_name(data, "data.json")
 ---@param data table The lua table to save to the file.
----@param filename string The name of the file to save the data to. Can contain subfolders.
+---@param filename string The name of the file to save the data to.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
 ---@return boolean is_saved true if the file was saved successfully, false otherwise.
 function M.save_file_by_name(data, filename, format)
@@ -377,17 +377,17 @@ end
 
 ---Saves the specified data to a file with the specified name. The data format is binary.
 ---@param data string The binary data to save to the file.
----@param filename string The name of the file to save the data to. Can contain subfolders.
+---@param filename string The name of the file to save the data to.
 ---@return boolean is_saved true if the file was saved successfully, false otherwise.
 function M.save_binary_by_name(data, filename)
 	return M.save_binary_by_path(data, M.get_save_path(filename))
 end
 
 
----Loads the data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
+---Loads the data from a file with the specified name. The file is loaded from the game save folder.
 ---		local data = saver.load_file_by_name("data.json")
 ---		pprint(data)
----@param filename string The name of the file to load the data from. Can contain subfolders.
+---@param filename string The name of the file to load the data from.
 ---@param format string|nil Optional format override (json, lua, serialized, binary)
 ---  NOTE: For binary data like images, use saver.load_binary_by_name instead.
 ---@return table|nil data The data loaded from the file. If the file does not exist, returns nil.
@@ -396,42 +396,39 @@ function M.load_file_by_name(filename, format)
 end
 
 
----Loads the binary data from a file with the specified name. The file is loaded from the game save folder. Filename supports subfolders.
----@param filename string The name of the file to load the binary data from. Can contain subfolders.
+---Loads the binary data from a file with the specified name. The file is loaded from the game save folder.
+---@param filename string The name of the file to load the binary data from.
 ---@return string|nil data The binary data loaded from the file. If the file does not exist, returns nil.
 function M.load_binary_by_name(filename)
 	return M.load_binary_by_path(M.get_save_path(filename))
 end
 
 
----Deletes the file with the specified name. The file is deleted from the game save folder. Filename supports subfolders.
+---Deletes the file with the specified name. The file is deleted from the game save folder.
 ---		saver.delete_file_by_name("data.json")
----@param filename string The name of the file to delete. Can contain subfolders.
+---@param filename string The name of the file to delete.
 ---@return boolean is_deleted true if the file was deleted successfully, false otherwise.
 function M.delete_file_by_name(filename)
 	return M.delete_file_by_path(M.get_save_path(filename))
 end
 
 
----Checks if the file exists with the specified name. The file is checked in the game save folder. Filename supports subfolders.
---		local is_header_downloaded = saver.is_file_exists_by_name("/cache/header.png")
----@param filename string The name of the file to check. Can contain subfolders.
+---Checks if the file exists with the specified name. The file is checked in the game save folder.
+---		local is_header_downloaded = saver.is_file_exists_by_name("header.png")
+---@param filename string The name of the file to check.
 ---@return boolean is_exists true if the file exists, false otherwise.
 function M.is_file_exists_by_name(filename)
 	return M.is_file_exists_by_path(M.get_save_path(filename))
 end
 
 
----Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned. Filename supports subfolders.
+---Returns the absolute path to the game save folder. If a file name is provided, the path to the file in the game save folder is returned.
 ---		local folder_path = saver.get_save_path()
 ---		print(folder_path) -- "/Users/user/Library/Application Support/Defold Saver/"
 ---
 ---		local file_path = saver.get_save_path("data.json")
 ---		print(file_path) -- "/Users/user/Library/Application Support/Defold Saver/data.json"
----
----		local file_path_2 = saver.get_save_path("profiles/profile1.json")
----		print(file_path_2) -- "/Users/user/Library/Application Support/Defold Saver/profiles/profile1.json"
----@param filename string|nil The name of the file to get the path for. Can contain subfolders. If nil, returns the folder path.
+---@param filename string|nil The name of the file to get the path for. If nil, returns the folder path.
 ---@return string path The absolute path to the game save folder, or the path to the file in the game save folder if a file name is provided.
 function M.get_save_path(filename)
 	-- If no filename provided, return just the folder path
