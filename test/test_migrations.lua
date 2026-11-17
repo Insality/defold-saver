@@ -51,5 +51,39 @@ return function()
 
 			saver.delete_game_state()
 		end)
+
+		it("Should not run migrations twice after an older game version loads the save", function ()
+			local function create_migrations(count)
+				local list = {}
+				for index = 1, count do
+					table.insert(list, function (save_table, logger)
+						save_table.foo = "bar" .. index
+					end)
+				end
+				return list
+			end
+
+			-- A new save on the newer game: 3 migrations
+			saver.delete_game_state()
+			saver.set_migrations(create_migrations(3))
+			saver.init()
+			saver.apply_migrations()
+			saver.save_game_state()
+
+			-- The older game with 1 migration loads it
+			saver.set_migrations(create_migrations(1))
+			saver.init()
+			saver.apply_migrations()
+			saver.save_game_state()
+
+			-- Back on the newer game: migrations 2 and 3 are already applied
+			saver.set_migrations(create_migrations(3))
+			saver.init()
+			saver.apply_migrations()
+
+			assert(saver.get_game_state().foo == nil)
+
+			saver.delete_game_state()
+		end)
 	end)
 end

@@ -589,6 +589,7 @@ end
 
 
 ---Applies the migrations set by saver.set_migrations function. It should be called after loading the game state manually with saver.init() function.
+---A save from a newer game version keeps its migration version: back on the newer game, its migrations do not run twice.
 ---		saver.apply_migrations()
 function M.apply_migrations()
 	local game_state = M.get_game_state()
@@ -597,12 +598,16 @@ function M.apply_migrations()
 	local current_version = saver_state.migration_version
 	local migrations_count = migrations.get_count()
 
+	if current_version > migrations_count then
+		saver_internal.logger:warn("The save is from a newer game version, its migration version stays", { save_version = current_version, migrations_count = migrations_count })
+	end
+
 	while current_version < migrations_count do
 		current_version = current_version + 1
 		migrations.apply(current_version, M.get_game_state(), saver_internal.logger)
 	end
 
-	saver_state.migration_version = migrations_count
+	saver_state.migration_version = current_version
 end
 
 
