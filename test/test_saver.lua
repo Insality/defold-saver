@@ -29,6 +29,16 @@ return function()
 			assert(state.value == 1)
 		end)
 
+		it("Should update last game version on load_game_state", function()
+			saver.get_game_state()["saver"].last_game_version = ""
+			saver.save_game_state()
+
+			saver.load_game_state()
+			local current_version = sys.get_config_string("project.version")
+			assert(saver.get_game_state()["saver"].last_game_version == current_version)
+		end)
+
+
 		it("Should save files in different formats", function()
 			saver.save_file_by_name({ foo = "bar" }, "test.json")
 			local data = saver.load_file_by_name("test.json")

@@ -98,7 +98,6 @@ function M.init(config)
 	end
 
 	M.load_game_state()
-	M.check_game_version()
 	M.set_autosave_timer(DEFAULT_AUTOSAVE_TIMER)
 
 	saver_internal.logger:debug("Saver initialized", { save_name = SAVE_NAME, instance_index = INSTANCE_INDEX })
@@ -161,6 +160,8 @@ function M.load_game_state(save_name)
 
 	storage.reset_state()
 	M.bind_save_state(STORAGE_KEY, storage.state)
+
+	M.check_game_version()
 
 	if is_loaded then
 		saver_internal.logger:info("Load game state", { save_name = save_name, path = M.get_save_path(save_name) })
