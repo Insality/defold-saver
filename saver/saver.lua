@@ -60,6 +60,7 @@ M.autosave_timer_id = nil
 M.autosave_timer_counter = 0
 M.last_autosave_time = nil
 M.before_save_callback = nil
+M.after_save_callback = nil
 
 --- File format enum (mirrors saver_internal.FORMAT)
 ---@enum saver.FORMAT
@@ -105,6 +106,7 @@ end
 
 
 ---Save the current game state to a file. If no file name is provided, the default file name specified in the game.project file is used.
+---Calls `saver.before_save_callback` before the save and `saver.after_save_callback` with the result after the file write.
 ---		-- Save the game with default name
 ---		saver.save_game_state()
 ---
@@ -131,6 +133,10 @@ function M.save_game_state(save_name)
 		saver_internal.logger:trace("Save game state to json", { save_name = save_name, path = path })
 	else
 		saver_internal.logger:error("Can't save the file to save directory", { save_name = save_name, path = path })
+	end
+
+	if M.after_save_callback then
+		M.after_save_callback(is_success, save_name)
 	end
 
 	return is_success
@@ -484,8 +490,9 @@ function M.on_autosave_timer()
 	M.last_autosave_time = current_time
 
 	if M.autosave_timer_counter <= 0 then
-		M.save_game_state()
+		-- Reset before the save: an error in a save callback should not stop the autosave
 		M.autosave_timer_counter = AUTOSAVE_TIMER
+		M.save_game_state()
 	end
 end
 
@@ -651,6 +658,19 @@ end
 ---		end
 ---@type function|nil
 M.before_save_callback = nil
+
+
+---A callback that is called after the saver writes the game state file, with the write result.
+---It is called on every `saver.save_game_state` call, autosave included, after the file write ends.
+---Use it to know the save is on disk: on `is_saved == false` the file is not written and the game state is not saved.
+---Calling `saver.save_game_state` inside is allowed, but not on every call: it would loop forever.
+---		saver.after_save_callback = function(is_saved, save_name)
+---			if is_saved then
+---				profile.on_saved()
+---			end
+---		end
+---@type fun(is_saved: boolean, save_name: string)|nil
+M.after_save_callback = nil
 
 
 return M

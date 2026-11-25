@@ -178,6 +178,7 @@ saver.get_save_version()
 saver.set_logger(logger)
 saver.get_current_game_project_folder()
 saver.before_save_callback = function() "Called before saver saves data" end
+saver.after_save_callback = function(is_saved, save_name) "Called after saver writes the save file" end
 ```
 
 ### API Reference
@@ -256,6 +257,14 @@ For any issues, questions, or suggestions, please [create an issue](https://gith
 
 ### **V10**
 - `saver.load_game_state` now checks the game version and updates `last_game_version`. Before it was done only in `saver.init`, so games that load the save manually never updated it
+
+### **V11**
+- Add `saver.after_save_callback(is_saved, save_name)`. Called after each game state save with the file write result, so the game knows the save is on disk
+- A failed JSON encode no longer clears the previous save file. The save returns `false` instead of an error
+- A failed file write or close (no free space for example) returns `false`. Before the save reported success
+- HTML5: a failed local storage write returns `false`. Before the save reported success
+- An error in a save callback no longer stops the autosave timer
+- Faster Lua format encode: one string concat instead of a new string per value
 
 </details>
 

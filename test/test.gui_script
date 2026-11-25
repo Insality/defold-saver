@@ -2,6 +2,7 @@ local deftest = require("deftest.deftest")
 
 function init(self)
 	deftest.add(require("test.test_saver"))
+	deftest.add(require("test.test_save_callbacks"))
 	deftest.add(require("test.test_storage"))
 	deftest.add(require("test.test_migrations"))
 	deftest.add(require("test.test_saver_storage"))

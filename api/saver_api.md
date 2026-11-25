@@ -41,6 +41,7 @@
 - [last_autosave_time](#last_autosave_time)
 - [FORMAT](#FORMAT)
 - [before_save_callback](#before_save_callback)
+- [after_save_callback](#after_save_callback)
 
 
 
@@ -92,6 +93,7 @@ saver.save_game_state([save_name])
 ```
 
 Save the current game state to a file. If no file name is provided, the default file name specified in the game.project file is used.
+Calls `saver.before_save_callback` before the save and `saver.after_save_callback` with the result after the file write.
 
 - **Parameters:**
 	- `[save_name]` *(string|nil)*: The name of the file to save the game state to. Default is the file name specified in the game.project file under the saver.save_file key.
@@ -672,3 +674,13 @@ Checks if the value exists in the saver storage.
 <a name="before_save_callback"></a>
 - **before_save_callback** (_nil_): A callback that is called before the saver saves the game state.
 
+<a name="after_save_callback"></a>
+- **after_save_callback** (_fun(is_saved: boolean, save_name: string)|nil_): A callback that is called after the saver writes the game state file, with the write result. Called on every `saver.save_game_state` call, autosave included. On `is_saved == false` the file is not written. Calling `saver.save_game_state` inside is allowed, but not on every call: it would loop forever.
+
+```lua
+saver.after_save_callback = function(is_saved, save_name)
+	if is_saved then
+		profile.on_saved()
+	end
+end
+```

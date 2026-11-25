@@ -3,6 +3,11 @@ local M = {}
 --- Use empty function to save a bit of memory
 local EMPTY_FUNCTION = function(_, message, context) end
 
+--- Sort keys of different types in a stable order
+local function compare_keys_as_strings(a, b)
+	return tostring(a) < tostring(b)
+end
+
 ---@type saver.logger
 M.empty_logger = {
 	trace = EMPTY_FUNCTION,
@@ -112,15 +117,14 @@ end
 ---@param filepath string The file path
 ---@return boolean success Whether the save was successful
 function M.save_json(data, filepath)
-	local file = io.open(filepath, "wb")
-	if not file then
-		M.logger:error("Can't open file for writing", filepath)
+	-- Encode before the file open: a failed encode keeps the previous file
+	local is_encoded, encoded_data = pcall(M.json_encode, data)
+	if not is_encoded or not encoded_data then
+		M.logger:error("Can't encode the data to JSON", { filepath = filepath, error = encoded_data })
 		return false
 	end
 
-	file:write(M.json_encode(data))
-	file:close()
-	return true
+	return M.write_file(encoded_data, filepath)
 end
 
 
@@ -157,16 +161,7 @@ end
 ---@param filepath string The file path
 ---@return boolean success Whether the save was successful
 function M.save_lua(data, filepath)
-	local file = io.open(filepath, "wb")
-	if not file then
-		M.logger:error("Can't open file for writing", filepath)
-		return false
-	end
-
-	local filedata = "return " .. M.table_to_lua_string(data)
-	file:write(filedata)
-	file:close()
-	return true
+	return M.write_file("return " .. M.table_to_lua_string(data), filepath)
 end
 
 
@@ -252,14 +247,28 @@ end
 ---@param filepath string The file path
 ---@return boolean success Whether the save was successful
 function M.save_binary(data, filepath)
+	return M.write_file(data, filepath)
+end
+
+
+---Write the string to the file. Fails if the file can't be opened, written or closed (no free space for example)
+---@param data string The data to write
+---@param filepath string The file path
+---@return boolean success Whether the file was written
+function M.write_file(data, filepath)
 	local file = io.open(filepath, "wb")
 	if not file then
 		M.logger:error("Can't open file for writing", filepath)
 		return false
 	end
 
-	file:write(data)
-	file:close()
+	local is_written, write_error = file:write(data)
+	local is_closed, close_error = file:close()
+	if not is_written or not is_closed then
+		M.logger:error("Can't write the file", { filepath = filepath, error = write_error or close_error })
+		return false
+	end
+
 	return true
 end
 
@@ -377,16 +386,27 @@ end
 ---@param is_array boolean|nil If the table is an array
 ---@return string The lua string
 function M.table_to_lua_string(tbl, indent, is_array)
-	indent = indent or ""
-	local result = "{\n"
+	local buffer = {}
+	M.write_lua_table(buffer, tbl, indent or "", is_array)
+	return table.concat(buffer)
+end
 
-	-- Handle arrays first if it's an array table
-	local array_part = {}
-	local dict_part = {}
+
+---Append the table as lua string parts to the buffer. One concat at the end instead of a new string per value
+---@param buffer string[] The parts of the lua string
+---@param tbl table The table to convert
+---@param indent string The indentation string
+---@param is_array boolean|nil If the table is an array
+function M.write_lua_table(buffer, tbl, indent, is_array)
+	local item_indent = indent .. "    "
+	buffer[#buffer + 1] = "{\n"
 
 	-- Split numeric and string keys
+	local array_part = {}
+	local dict_part = {}
+	local array_length = #tbl
 	for k, v in pairs(tbl) do
-		if type(k) == "number" and k > 0 and k <= #tbl then
+		if type(k) == "number" and k > 0 and k <= array_length then
 			array_part[k] = v
 		else
 			dict_part[k] = v
@@ -394,23 +414,20 @@ function M.table_to_lua_string(tbl, indent, is_array)
 	end
 
 	-- Process array part first to maintain order
-	if is_array or #array_part > 0 then
-		for i = 1, #array_part do
-			local v = array_part[i]
-			result = result .. indent .. "    "
+	for i = 1, #array_part do
+		local v = array_part[i]
+		buffer[#buffer + 1] = item_indent
 
-			-- Add value based on its type
-			if type(v) == "table" then
-				-- Check if nested table is array-like
-				local v_is_array = #v > 0
-				result = result .. M.table_to_lua_string(v, indent .. "    ", v_is_array)
-			elseif type(v) == "string" then
-				result = result .. string.format("%q", v)
-			else
-				result = result .. tostring(v)
-			end
-			result = result .. ",\n"
+		-- Add value based on its type
+		if type(v) == "table" then
+			-- Check if nested table is array-like
+			M.write_lua_table(buffer, v, item_indent, #v > 0)
+		elseif type(v) == "string" then
+			buffer[#buffer + 1] = string.format("%q", v)
+		else
+			buffer[#buffer + 1] = tostring(v)
 		end
+		buffer[#buffer + 1] = ",\n"
 	end
 
 	-- Get and sort dictionary keys
@@ -418,49 +435,48 @@ function M.table_to_lua_string(tbl, indent, is_array)
 	for k in pairs(dict_part) do
 		table.insert(sorted_keys, k)
 	end
-	table.sort(sorted_keys, function(a, b)
-		-- Convert to strings for comparison
-		return tostring(a) < tostring(b)
-	end)
+	table.sort(sorted_keys, compare_keys_as_strings)
 
 	-- Process dictionary part with sorted keys
-	for _, k in ipairs(sorted_keys) do
+	for index = 1, #sorted_keys do
+		local k = sorted_keys[index]
 		local v = dict_part[k]
-		result = result .. indent .. "    "
+		buffer[#buffer + 1] = item_indent
 
 		-- Format key
 		if type(k) == "string" then
 			-- Check if key needs to be quoted
 			if k:match("[^%w_]") then
-				result = result .. "[" .. string.format("%q", k) .. "]"
+				buffer[#buffer + 1] = "[" .. string.format("%q", k) .. "]"
 			else
-				result = result .. k
+				buffer[#buffer + 1] = k
 			end
 		else
-			result = result .. "[" .. tostring(k) .. "]"
+			buffer[#buffer + 1] = "[" .. tostring(k) .. "]"
 		end
-		result = result .. " = "
+		buffer[#buffer + 1] = " = "
 
 		-- Format value
 		if type(v) == "table" then
-			local v_is_array = #v > 0
-			result = result .. M.table_to_lua_string(v, indent .. "    ", v_is_array)
+			M.write_lua_table(buffer, v, item_indent, #v > 0)
 		elseif type(v) == "string" then
 			local is_require = M.LUA_REQUIRE_AS_STRING and v:sub(-1) == ')' and v:sub(1, 8) == 'require('
 			if is_require then
-				result = result .. v
+				buffer[#buffer + 1] = v
 			else
-				result = result .. string.format("%q", v)
+				buffer[#buffer + 1] = string.format("%q", v)
 			end
 		else
-			result = result .. tostring(v)
+			buffer[#buffer + 1] = tostring(v)
 		end
-		result = result .. ",\n"
+		buffer[#buffer + 1] = ",\n"
 	end
 
-	result = result .. indent .. "}"
-	return result
+	buffer[#buffer + 1] = indent .. "}"
 end
+
+--- html5.run returns the script result as a string: "true" or "false"
+local HTML5_TRUE = "true"
 
 local GET_LOCAL_STORAGE = [[
 (function() {
@@ -519,15 +535,13 @@ function M.save_html5(data, path)
 		-- For non-table data (like raw binary), we need to encode it to base64 first
 		local encoded_data = defold_saver.encode_base64(data)
 		local html_command = string.format(SET_LOCAL_STORAGE, path, encoded_data)
-		local is_save_successful = html5.run(html_command)
-		return (not not is_save_successful)
+		return html5.run(html_command) == HTML5_TRUE
 	end
 
 	-- For tables, use the existing serialization
 	local encoded_data = defold_saver.encode_base64(sys.serialize(data))
 	local html_command = string.format(SET_LOCAL_STORAGE, path, encoded_data)
-	local is_save_successful = html5.run(html_command)
-	return (not not is_save_successful)
+	return html5.run(html_command) == HTML5_TRUE
 end
 
 
@@ -546,8 +560,7 @@ local REMOVE_LOCAL_STORAGE = [[
 ---@param path string The path to the data in the local storage
 ---@return boolean true if the data was removed successfully, false otherwise
 function M.delete_html5(path)
-	local is_delete_successful = html5.run(string.format(REMOVE_LOCAL_STORAGE, path))
-	return (not not is_delete_successful)
+	return html5.run(string.format(REMOVE_LOCAL_STORAGE, path)) == HTML5_TRUE
 end
 
 
